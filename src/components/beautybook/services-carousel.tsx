@@ -5,15 +5,9 @@ import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import type { Service } from '@/lib/beautybook-data'
+import { getCarouselVisibleCount } from '@/lib/carousel'
 import { getServiceIcon } from '@/lib/service-icons'
 import { formatCOP } from '@/lib/utils'
-
-function getVisibleCount() {
-  if (typeof window === 'undefined') return 3
-  if (window.innerWidth <= 620) return 1
-  if (window.innerWidth <= 850) return 2
-  return 3
-}
 
 export function ServicesCarousel({ services }: { services: Service[] }) {
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -47,7 +41,7 @@ export function ServicesCarousel({ services }: { services: Service[] }) {
 
   useEffect(() => {
     const update = () => {
-      const visible = getVisibleCount()
+      const visible = getCarouselVisibleCount()
       const count = Math.max(1, services.length - visible + 1)
       setSteps(count)
       setActive((current) => Math.min(current, count - 1))

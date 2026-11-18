@@ -5,7 +5,8 @@ import Image from 'next/image'
 import { ArrowUpDown, Banknote, CalendarDays, Check, ChevronDown, CircleCheck, Clock3, Eye, Globe, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Phone, Plus, Search, Settings2, Sparkles, Ticket, Trash2, Upload, User, Users, type LucideIcon } from 'lucide-react'
 import { demoAppointments, demoCustomers, demoProfessionals, demoServices, type DemoAppointment, type AppointmentStatus } from '@/lib/dashboard-demo-data'
 import { FilterDropdown, Modal, StatusBadge } from '@/components/beautybook/dashboard-ui'
-import { formatCOP } from '@/lib/utils'
+import { capitalize, formatCOP } from '@/lib/utils'
+import { isValidEmail } from '@/lib/validation'
 import { DashboardShell, type DashboardNavItem } from '@/components/beautybook/dashboard-shell'
 import { serviceProfessionals } from '@/lib/beautybook-data'
 
@@ -280,7 +281,6 @@ const agendaTimeSlots = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '
 function formatAgendaDate(iso: string) {
   const [year, month, day] = iso.split('-').map(Number)
   const date = new Date(year, month - 1, day)
-  const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1)
   const weekday = new Intl.DateTimeFormat('es-ES', { weekday: 'short' }).format(date).replace('.', '')
   const monthName = new Intl.DateTimeFormat('es-ES', { month: 'short' }).format(date).replace('.', '')
   return `${capitalize(weekday)}, ${day} ${monthName}.`
@@ -339,7 +339,7 @@ function CreateAppointmentModal({ onClose, onSave, initial, title = 'Agendar cit
       setError('Selecciona el servicio, la especialista, la fecha y la hora.')
       return
     }
-    if (!name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || !phone.trim()) {
+    if (!name.trim() || !isValidEmail(email.trim()) || !phone.trim()) {
       setError('Completa el nombre, un email válido y el teléfono del cliente.')
       return
     }
@@ -599,7 +599,7 @@ function EditProfessionalModal({ initial, onClose, onSave }: { initial: Professi
       setError('Completa el nombre y el número de contacto.')
       return
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || !password) {
+    if (!isValidEmail(email.trim()) || !password) {
       setError('Completa un correo válido y la contraseña de acceso.')
       return
     }
@@ -723,7 +723,7 @@ function AddProfessionalModal({ onClose, onSave }: { onClose: () => void; onSave
       setError('Completa el nombre y el número de contacto.')
       return
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || !password) {
+    if (!isValidEmail(email.trim()) || !password) {
       setError('Completa un correo válido y la contraseña de acceso.')
       return
     }
@@ -884,7 +884,7 @@ function CustomerFormModal({ initial, title, eyebrow, submitLabel, onClose, onSa
       setError('Completa el nombre y el teléfono del cliente.')
       return
     }
-    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    if (email.trim() && !isValidEmail(email.trim())) {
       setError('Ingresa un correo electrónico válido.')
       return
     }

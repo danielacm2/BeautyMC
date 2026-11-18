@@ -6,7 +6,8 @@ import Image from 'next/image'
 import { ArrowLeft, ArrowRight, Asterisk, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, MapPin, User, X } from 'lucide-react'
 import { professionals, serviceProfessionals, services } from '@/lib/beautybook-data'
 import { getServiceIcon } from '@/lib/service-icons'
-import { formatCOP } from '@/lib/utils'
+import { capitalize, formatCOP } from '@/lib/utils'
+import { isValidEmail } from '@/lib/validation'
 
 const steps = ['Servicio', 'Profesional', 'Fecha y hora', 'Tus datos', 'Confirmación']
 const weekdayTimes = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00']
@@ -148,11 +149,11 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
     const lastMonth = last.getMonth()
     if (firstMonth === lastMonth) {
       const label = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(first)
-      return label.charAt(0).toUpperCase() + label.slice(1)
+      return capitalize(label)
     }
     const shortMonth = (date: Date) => {
       const label = monthShort.format(date).replace(/\./g, '')
-      return label.charAt(0).toUpperCase() + label.slice(1)
+      return capitalize(label)
     }
     if (first.getFullYear() !== last.getFullYear()) {
       return `${shortMonth(first)} ${first.getFullYear()} – ${shortMonth(last)} ${last.getFullYear()}`
@@ -162,7 +163,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
   const compactDate = useMemo(() => {
     if (!selectedDate) return ''
     const label = new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }).format(selectedDate).replace(/\./g, '')
-    return label.charAt(0).toUpperCase() + label.slice(1)
+    return capitalize(label)
   }, [selectedDate])
   const selectedWeekday = selectedDate ? selectedDate.getDay() : 1
   const selectedInCurrentWeek = selectedDate ? currentWeek.days.some((date) => isSameDay(date, selectedDate)) : false
@@ -200,7 +201,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
     if (step === 0 && !serviceId) return setError('Elige un servicio para continuar.')
     if (step === 2 && (!selectedDateKey || !time)) return setError('Selecciona una fecha y una hora.')
     if (step === 3) {
-      if (!name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !phone.trim()) return setError('Completa tu nombre, un email válido y tu teléfono.')
+      if (!name.trim() || !isValidEmail(email) || !phone.trim()) return setError('Completa tu nombre, un email válido y tu teléfono.')
       if (!acceptedPrivacy) return setPrivacyError('Para continuar, acepta la política de privacidad.')
     }
     setStep((current) => Math.min(current + 1, 4))

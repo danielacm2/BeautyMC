@@ -3,13 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Star } from 'lucide-react'
 import type { Testimonial } from '@/lib/beautybook-data'
-
-function getVisibleCount() {
-  if (typeof window === 'undefined') return 3
-  if (window.innerWidth <= 620) return 1
-  if (window.innerWidth <= 850) return 2
-  return 3
-}
+import { getCarouselVisibleCount } from '@/lib/carousel'
 
 function getInitials(name: string) {
   return name
@@ -53,7 +47,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
 
   useEffect(() => {
     const update = () => {
-      const visible = getVisibleCount()
+      const visible = getCarouselVisibleCount()
       const count = Math.max(1, testimonials.length - visible + 1)
       setSteps(count)
       setActive((current) => Math.min(current, count - 1))

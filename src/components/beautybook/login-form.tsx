@@ -3,15 +3,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, ArrowUpRight, Eye, EyeOff } from 'lucide-react'
+import { isValidEmail } from '@/lib/validation'
 
 type FieldErrors = { email?: string; password?: string }
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function validate(email: string, password: string): FieldErrors {
   const errors: FieldErrors = {}
   if (!email.trim()) errors.email = 'Escribe tu correo electrónico.'
-  else if (!emailPattern.test(email.trim())) errors.email = 'Introduce un correo válido, por ejemplo nombre@dominio.com.'
+  else if (!isValidEmail(email.trim())) errors.email = 'Introduce un correo válido, por ejemplo nombre@dominio.com.'
   if (!password) errors.password = 'Escribe tu contraseña.'
   return errors
 }

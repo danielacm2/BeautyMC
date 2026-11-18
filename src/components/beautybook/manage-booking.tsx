@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Asterisk, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, User, X } from 'lucide-react'
-import { formatCOP } from '@/lib/utils'
+import { capitalize, formatCOP } from '@/lib/utils'
 
 type BookingStatus = 'confirmed' | 'cancelled' | 'expired'
 type ManageView = 'search' | 'detail' | 'reschedule' | 'cancelled'
@@ -79,7 +79,6 @@ const rescheduleWeeks = [
 ]
 
 const keyOfDate = (date: Date) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
-const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1)
 const formatLongDate = (date: Date) => longDate.format(date).replace(',', '')
 
 const cancelReasons = ['Cambio de planes', 'Encontré otro horario', 'Un imprevisto', 'Otro']

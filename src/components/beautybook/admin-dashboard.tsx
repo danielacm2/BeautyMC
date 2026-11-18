@@ -3,12 +3,28 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import Image from 'next/image'
 import { ArrowUpDown, Banknote, CalendarDays, Check, ChevronDown, CircleCheck, Clock3, Eye, Globe, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Phone, Plus, Search, Settings2, Sparkles, Ticket, Trash2, Upload, User, Users, type LucideIcon } from 'lucide-react'
-import { demoAppointments, demoCustomers, demoProfessionals, demoServices, type DemoAppointment, type AppointmentStatus } from '@/lib/dashboard-demo-data'
+import { demoAppointments, demoCustomers, demoProfessionals, demoServices, type DemoAppointment } from '@/lib/dashboard-demo-data'
 import { FilterDropdown, Modal, StatusBadge } from '@/components/beautybook/dashboard-ui'
-import { capitalize, formatCOP } from '@/lib/utils'
+import { formatCOP } from '@/lib/utils'
 import { isValidEmail } from '@/lib/validation'
 import { DashboardShell, type DashboardNavItem } from '@/components/beautybook/dashboard-shell'
 import { serviceProfessionals } from '@/lib/beautybook-data'
+import {
+  categoryLabel,
+  formatAgendaDate,
+  initialsOf,
+  type AdminModal,
+  type AppointmentDraft,
+  type Customer,
+  type CustomerDraft,
+  type CustomerFilter,
+  type DaySchedule,
+  type Holiday,
+  type ProfessionalForm,
+  type ProfessionalItem,
+  type ServiceDraft,
+  type ServiceItem,
+} from '@/components/beautybook/admin/admin-shared'
 
 const navItems: DashboardNavItem[] = [
   { id: 'inicio', label: 'Inicio', icon: CalendarDays },
@@ -39,11 +55,6 @@ const valeriaSample: DemoAppointment = {
   id: 'BB-1056', customer: 'Valeria Gómez', initials: 'VG', phone: '+34 600 123 456', email: 'valeria.g@email.com',
   service: 'Lifting de pestañas', professional: 'Inés Vega', date: 'Hoy, 14 nov.', time: '15:30', price: 180000, status: 'Confirmada',
 }
-
-type Customer = (typeof demoCustomers)[number]
-type ServiceItem = (typeof demoServices)[number]
-type ProfessionalItem = (typeof demoProfessionals)[number]
-type AdminModal = { kind: 'appointment'; appointment: DemoAppointment } | { kind: 'customer'; customer: Customer } | { kind: 'service'; service?: ServiceItem } | null
 
 export default function AdminDashboard() {
   const [view, setView] = useState('inicio')
@@ -278,14 +289,6 @@ function weekdayOf(date: string) {
 
 const agendaTimeSlots = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00']
 
-function formatAgendaDate(iso: string) {
-  const [year, month, day] = iso.split('-').map(Number)
-  const date = new Date(year, month - 1, day)
-  const weekday = new Intl.DateTimeFormat('es-ES', { weekday: 'short' }).format(date).replace('.', '')
-  const monthName = new Intl.DateTimeFormat('es-ES', { month: 'short' }).format(date).replace('.', '')
-  return `${capitalize(weekday)}, ${day} ${monthName}.`
-}
-
 function formatHour12(value: string) {
   const [hours, minutes] = value.split(':').map(Number)
   if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return value
@@ -304,13 +307,6 @@ function upcomingAgendaDays(count = 14) {
   }
   return days
 }
-
-function initialsOf(name: string) {
-  const parts = name.trim().split(/\s+/)
-  return (((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?')
-}
-
-type AppointmentDraft = { serviceId: string; professional: string; dateISO: string; dateLabel: string; time: string; name: string; email: string; phone: string; status: AppointmentStatus }
 
 function CreateAppointmentModal({ onClose, onSave, initial, title = 'Agendar cita', eyebrow = 'NUEVA RESERVA', submitLabel = 'Guardar cita' }: { onClose: () => void; onSave: (draft: AppointmentDraft) => void; initial?: AppointmentDraft; title?: string; eyebrow?: string; submitLabel?: string }) {
   const [serviceId, setServiceId] = useState(initial?.serviceId ?? '')
@@ -409,10 +405,6 @@ function AppointmentsView({ appointments, onOpen, onAdd, onEditRequest, onDelete
   return <div className="bb-page-stack"><section className="bb-hello-panel bb-agenda-panel" aria-labelledby="bb-agenda-title"><div className="bb-hello-mark" aria-hidden="true">b</div><div className="bb-hello-copy"><span className="bb-hello-eyebrow"><span>GESTIÓN DE RESERVAS</span><i className="bb-hello-dot" aria-hidden="true" /><span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4A7C59] opacity-75"></span><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#4A7C59]"></span></span><span>AGENDA SINCRONIZADA</span></span><h2 id="bb-agenda-title">Agenda de citas</h2><p>Consulta, confirma y gestiona todas las reservas del salón en un solo lugar.</p></div><div className="bb-agenda-side"><div className="bb-agenda-capsule" role="list" aria-label="Resumen de agenda"><div className="bb-agenda-metric" role="listitem"><span className="bb-agenda-label">CITAS HOY</span><strong className="bb-agenda-value">12</strong></div><div className="bb-agenda-metric" role="listitem"><span className="bb-agenda-label">ESTA SEMANA</span><strong className="bb-agenda-value">86</strong></div><div className="bb-agenda-metric" role="listitem"><span className="bb-agenda-label">PROYECCIÓN MUESTRA</span><strong className="bb-agenda-value is-accent">$ 1.490.000</strong></div></div></div></section>{creating && <CreateAppointmentModal onClose={cancelCreate} onSave={saveCreated} />}{deletingAppointment && <DeleteAppointmentModal appointment={deletingAppointment} onClose={cancelDelete} onConfirm={confirmDelete} />}<section className="bb-panel bb-table-panel bb-agenda-card"><div className="bb-agenda-controls"><div className="bb-agenda-tabs" role="tablist" aria-label="Filtros rápidos de citas"><button type="button" role="tab" aria-selected={quick === 'todas'} className={quick === 'todas' ? 'is-active' : ''} onClick={() => setQuick('todas')}>Todas <span className="bb-count-beige">{totalCount}</span></button><button type="button" role="tab" aria-selected={quick === 'hoy'} className={quick === 'hoy' ? 'is-active' : ''} onClick={() => setQuick('hoy')}>Hoy {todayCount}</button></div><button type="button" className="bb-hello-primary bb-agenda-new" onClick={() => setCreating(true)}><Plus aria-hidden="true" />Nueva cita</button></div><div className="bb-agenda-searchrow"><label className="bb-agenda-search"><Search aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por cliente, código (ej. BB-1048) o servicio..." aria-label="Buscar citas" /></label><FilterDropdown icon={User} value={specialist} options={specialistOptions} onChange={setSpecialist} label="Filtrar por especialista" /><FilterDropdown icon={CalendarDays} value={day} options={agendaDayOptions} onChange={setDay} label="Filtrar por fecha" /></div><div className="bb-table-scroll"><table className="bb-data-table bb-agenda-table bb-citas-table"><thead><tr><th>CLIENTE</th><th>SERVICIO</th><th>PROFESIONAL</th><th>FECHA Y HORA</th><th className="bb-th-right">ACCIONES</th></tr></thead><tbody>{filtered.map((appointment) => { const isToday = appointment.date.startsWith('Hoy'); const isNext = appointment.id === 'BB-1050'; return <tr key={appointment.id} className={isNext ? 'is-next' : undefined}><td><span className="bb-client-cell"><span className="bb-client-avatar" aria-hidden="true">{appointment.initials}</span><span className="bb-client-text"><strong>{appointment.customer}</strong><small>{appointment.id}</small></span></span></td><td><span className="bb-service-cell"><strong>{appointment.service}</strong><small>{formatCOP(appointment.price)}</small></span></td><td><span className="bb-pro-cell"><User aria-hidden="true" />{appointment.professional}</span></td><td><span className="bb-datetime-cell"><strong>{isToday && <i className="bb-today-dot" aria-hidden="true" />}{appointment.date}</strong><small>{appointment.time}</small></span></td><td className="bb-actions-cell"><span className="bb-ghost-actions"><button type="button" className="bb-ghost-btn bb-ghost-view" aria-label={`Ver detalle de ${appointment.customer}`} onClick={() => onOpen(appointment)}><Eye aria-hidden="true" /></button><button type="button" className="bb-ghost-btn bb-ghost-edit" aria-label={`Editar cita de ${appointment.customer}`} onClick={() => onEditRequest(appointment)}><Pencil aria-hidden="true" /></button><button type="button" className="bb-ghost-btn bb-ghost-delete" aria-label={`Eliminar cita de ${appointment.customer}`} onClick={() => setDeletingId(appointment.id)}><Trash2 aria-hidden="true" /></button></span></td></tr> })}</tbody></table>{filtered.length === 0 && <div className="bb-empty-state"><Search /><strong>No hay citas con estos filtros</strong><span>Prueba con otro especialista, día o término de búsqueda.</span></div>}</div><div className="bb-table-footer bb-agenda-footer"><span>Mostrando {filtered.length} de {appointments.length} citas de muestra</span><div className="bb-pager"><button type="button" className="bb-page-btn">Anterior</button><button type="button" className="bb-page-btn is-current" aria-current="page">1</button><button type="button" className="bb-page-btn">Siguiente</button></div></div></section></div>
 }
 
-function categoryLabel(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
-}
-
 function ServiceDetailModal({ service, onClose }: { service: ServiceItem; onClose: () => void }) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -434,8 +426,6 @@ function DeleteServiceModal({ service, onClose, onConfirm }: { service: ServiceI
   }, [onClose])
   return <div className="bb-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="bb-delete-card" role="alertdialog" aria-modal="true" aria-labelledby="bb-delete-service-title" aria-describedby="bb-delete-service-description"><button type="button" className="bb-detail-close" onClick={onClose} aria-label="Cerrar">×</button><span className="bb-delete-icon" aria-hidden="true"><Trash2 /></span><h2 id="bb-delete-service-title">¿Eliminar este servicio?</h2><p id="bb-delete-service-description">Estás a punto de eliminar permanentemente este servicio del catálogo. Esta acción no se puede deshacer.</p><div className="bb-delete-summary"><div className="bb-delete-top"><strong>{service.category}</strong><span>{formatCOP(service.price)}</span></div><strong className="bb-delete-name">{service.name}</strong><span className="bb-delete-service">{service.description}</span></div><div className="bb-delete-actions"><button type="button" className="bb-delete-cancel" onClick={onClose}>Cancelar</button><button type="button" className="bb-delete-confirm" onClick={onConfirm}><Trash2 aria-hidden="true" />Sí, eliminar</button></div></section></div>
 }
-
-type ServiceDraft = { name: string; category: string; price: number; description: string; image: string }
 
 const NEW_SERVICE_CATEGORY = '__nueva__'
 
@@ -762,8 +752,6 @@ function AddProfessionalModal({ onClose, onSave }: { onClose: () => void; onSave
   return <div className="bb-book-modal"><Modal title="Añadir profesional al equipo" description="NUEVO INTEGRANTE" onClose={onClose}><form className="bb-form bb-book-form" onSubmit={submit} noValidate><div className="bb-book-grid"><div className="bb-book-col"><div className="bb-field bb-photo-field"><div className="bb-field-head"><span>Foto de perfil</span></div>{imageData ? <><span className="bb-photo-circle"><Image src={imageData} alt={`Foto de ${name || 'nuevo profesional'}`} fill sizes="240px" unoptimized /></span><div className="bb-upload-row"><button type="button" className="bb-button bb-button-outline" onClick={() => fileRef.current?.click()}>Cambiar</button><button type="button" className="bb-button bb-button-outline" onClick={() => setImageData('')}>Quitar</button><input ref={fileRef} type="file" accept="image/*" onChange={pickImage} /></div></> : <label className="bb-upload-box"><input type="file" accept="image/*" onChange={pickImage} /><ImagePlus aria-hidden="true" /><strong>Agregar foto</strong><small>Desde tu computador o dispositivo</small></label>}<span className="bb-photo-hint">Visible para clientas al agendar</span></div><div className="bb-field"><div className="bb-field-head"><span>Descripción del perfil *</span></div><textarea value={bio} onChange={(event) => setBio(event.target.value)} placeholder="Experiencia, estilo y especialidades del profesional..." rows={3} /></div></div><div className="bb-book-col"><div className="bb-form-row"><div className="bb-field"><div className="bb-field-head"><span>Nombre completo *</span></div><input value={name} onChange={(event) => setName(event.target.value)} placeholder="Ej. Camila Duarte" autoComplete="off" /></div><div className="bb-field"><div className="bb-field-head"><span>Número de contacto *</span></div><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="300 123 4567" autoComplete="off" /></div></div><div className="bb-form-row"><div className="bb-field"><div className="bb-field-head"><span>Correo de acceso *</span></div><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="camila@beautymc.co" autoComplete="off" /></div><div className="bb-field"><div className="bb-field-head"><span>Contraseña *</span></div><input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="••••••••" autoComplete="new-password" /></div></div><div className="bb-field"><div className="bb-field-head"><span>Horario laboral *</span></div><MultiDayPicker selected={schedDays} onChange={setSchedDays} label="Días laborables" /><div className="bb-form-row bb-schedule-row"><TimePicker value={schedStart} onChange={setSchedStart} label="Hora de entrada" placeholder="Entrada" /><TimePicker value={schedEnd} onChange={setSchedEnd} label="Hora de salida" placeholder="Salida" align="right" /></div></div></div></div><div className="bb-field"><div className="bb-field-head"><span>Servicios habilitados</span></div><div className="bb-enable-chips" role="group" aria-label="Servicios habilitados">{availableCategories.map((item) => <button key={item} type="button" aria-pressed={enabledCategories.includes(item)} className={enabledCategories.includes(item) ? 'is-on' : ''} onClick={() => toggleCategory(item)}>{categoryLabel(item)}</button>)}</div></div>{error && <p className="bb-form-error" role="alert">{error}</p>}<div className="bb-book-actions"><button type="button" className="bb-button bb-button-outline" onClick={onClose}>Cancelar</button><button type="submit" className="bb-button bb-button-primary"><Plus aria-hidden="true" />Añadir profesional</button></div></form></Modal></div>
 }
 
-type ProfessionalForm = { name: string; email: string; password: string; phone: string; bio: string; schedule: string; categories: string[]; image: string }
-
 function ProfessionalsView({ professionals, appointments, onToggle, onAdd, onEdit, onDelete, notify }: { professionals: typeof demoProfessionals; appointments: DemoAppointment[]; onToggle: (id: string) => void; onAdd: (draft: ProfessionalForm & { specialty: string }) => void; onEdit: (id: string, draft: ProfessionalForm & { specialty: string }) => void; onDelete: (id: string) => void; notify: (message: string) => void }) {
   const activeProfessionals = professionals.filter((person) => person.active).length
   const weekAppointments = professionals.reduce((sum, person) => sum + (person.appointments ?? 0), 0)
@@ -822,10 +810,6 @@ function ProfessionalsView({ professionals, appointments, onToggle, onAdd, onEdi
   }
   return <div className="bb-page-stack"><section className="bb-hello-panel bb-agenda-panel" aria-labelledby="bb-team-title"><div className="bb-hello-mark" aria-hidden="true">b</div><div className="bb-hello-copy"><span className="bb-hello-eyebrow"><span>EQUIPO DEL SALÓN</span><i className="bb-hello-dot" aria-hidden="true" /><span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4A7C59] opacity-75"></span><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#4A7C59]"></span></span><span>{activeProfessionals} ESPECIALISTAS ACTIVOS</span></span><h2 id="bb-team-title">Profesionales</h2><p>Gestiona los perfiles, horarios, especialidades y visibilidad de tu equipo en el salón.</p></div><div className="bb-agenda-side"><div className="bb-agenda-capsule" role="list" aria-label="Resumen del equipo"><div className="bb-agenda-metric" role="listitem"><span className="bb-agenda-label">ACTIVOS</span><strong className="bb-agenda-value">{activeProfessionals}</strong></div><div className="bb-agenda-metric" role="listitem"><span className="bb-agenda-label">CITAS SEMANA</span><strong className="bb-agenda-value">{weekAppointments}</strong></div></div></div></section><section className="bb-panel bb-table-panel bb-agenda-card bb-team-filter-card"><div className="bb-agenda-controls bb-team-filter"><div className="bb-agenda-tabs" role="tablist" aria-label="Filtrar por categoría"><button type="button" role="tab" aria-selected={categoryFilter === 'Todas'} className={categoryFilter === 'Todas' ? 'is-active' : ''} onClick={() => setCategoryFilter('Todas')}>Todos <span className="bb-count-beige">{professionals.length}</span></button>{categoryFilters.map((item) => <button key={item.value} type="button" role="tab" aria-selected={categoryFilter === item.value} className={categoryFilter === item.value ? 'is-active' : ''} onClick={() => setCategoryFilter(item.value)}>{item.label} {item.count}</button>)}</div><div className="bb-team-actions"><label className="bb-agenda-search bb-team-search"><Search aria-hidden="true" /><input value={teamQuery} onChange={(event) => setTeamQuery(event.target.value)} placeholder="Buscar especialista o especialidad..." aria-label="Buscar especialista" /></label><button type="button" className="bb-hello-primary bb-agenda-new" onClick={() => setAddingProfessional(true)}><Plus aria-hidden="true" />Añadir profesional</button></div></div></section><div className="bb-team-grid">{filteredTeam.map((person) => <article className="bb-team-card" key={person.id}><div className="bb-team-top"><span className="bb-team-avatar" aria-hidden="true">{person.image ? <Image src={person.image} alt="" fill sizes="104px" /> : <span className="bb-team-initials">{person.initials}</span>}{person.active && <i className="bb-team-dot" />}</span><span className="bb-team-identity"><strong>{person.name}</strong><span className="bb-team-tags">{categoriesOf(person).map((item) => <span key={item} className="bb-category-chip">{categoryLabel(item)}</span>)}</span></span><span className="bb-team-side"><StatusBadge status={person.active ? 'Activo' : 'Inactivo'} /><span className="bb-ghost-actions"><button type="button" className="bb-ghost-btn bb-ghost-view" aria-label={`Ver perfil de ${person.name}`} onClick={() => setTeamDetail(person)}><Eye aria-hidden="true" /></button><button type="button" className="bb-ghost-btn bb-ghost-edit" aria-label={`Editar perfil de ${person.name}`} onClick={() => setTeamEditing(person)}><Pencil aria-hidden="true" /></button><button type="button" className="bb-ghost-btn bb-ghost-delete" aria-label={`Eliminar perfil de ${person.name}`} onClick={() => setTeamDeleting(person)}><Trash2 aria-hidden="true" /></button></span></span></div><div className="bb-team-boxes"><div className="bb-team-box"><span><Clock3 aria-hidden="true" />HORARIO</span><strong>{person.schedule}</strong></div><div className="bb-team-box"><span><CalendarDays aria-hidden="true" />ESTA SEMANA</span><strong>{person.appointments} citas programadas</strong></div></div><div className="bb-team-foot"><span className="bb-team-visibility"><span>Perfil visible en reservas</span><button className={`bb-switch ${person.active ? 'is-on' : ''}`} role="switch" aria-checked={person.active} aria-label={`${person.active ? 'Desactivar' : 'Activar'} perfil de ${person.name}`} onClick={() => onToggle(person.id)}><i /></button></span></div></article>)}{filteredTeam.length === 0 && <div className="bb-panel bb-table-panel bb-agenda-card"><div className="bb-empty-state"><Search aria-hidden="true" /><strong>No hay especialistas con estos filtros</strong><span>Prueba con otra especialidad o término de búsqueda.</span></div></div>}</div>{teamDetail && <ProfessionalDetailModal professional={teamDetail} categories={categoriesOf(teamDetail)} appointments={appointments} onClose={() => setTeamDetail(null)} />}{teamEditing && <EditProfessionalModal key={teamEditing.id} initial={teamEditing} onClose={cancelProfessionalEdit} onSave={(draft) => saveProfessionalEdit(teamEditing.id, draft)} />}{teamDeleting && <DeleteProfessionalModal professional={teamDeleting} onClose={cancelProfessionalDelete} onConfirm={confirmProfessionalDelete} />}{addingProfessional && <AddProfessionalModal onClose={cancelProfessionalCreate} onSave={saveProfessional} />}</div>
 }
-
-type CustomerFilter = 'todos' | 'vip' | 'nuevos';
-
-type CustomerDraft = { name: string; email: string; phone: string; favoriteService: string; vip: boolean };
 
 function CustomersView({ onOpen, notify }: { onOpen: (customer: Customer) => void; notify: (message: string) => void }) {
   const [query, setQuery] = useState('')
@@ -958,9 +942,6 @@ const SALON_DEFAULTS = {
 
 const CURRENCY_OPTIONS = ['COP ($) · Peso colombiano', 'EUR (€) · Euro', 'USD (US$) · Dólar estadounidense'];
 const TIMEZONE_OPTIONS = ['Bogotá (GMT-5)', 'Medellín (GMT-5)'];
-
-type DaySchedule = { day: string; open: string; close: string; enabled: boolean };
-type Holiday = { iso: string; reason: string };
 
 const DEFAULT_DAYS: DaySchedule[] = [
   { day: 'Lunes', open: '10:00 a.m.', close: '08:00 p.m.', enabled: true },

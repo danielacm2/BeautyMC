@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Asterisk, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, User, X } from 'lucide-react'
-import { normalizeDateKey, startOfToday, toDateKey } from '@/lib/date-utils'
+import { isPastTimeSlot, normalizeDateKey, startOfToday, toDateKey } from '@/lib/date-utils'
 import { getDemoBusyTimes, getDemoDayTimes, getDemoWeeks } from '@/lib/demo-availability'
 import { capitalize, formatCOP } from '@/lib/utils'
 
@@ -77,6 +77,8 @@ export default function ManageBooking() {
   const [cancelOpen, setCancelOpen] = useState(false)
   // Inicio del día de hoy: los días anteriores no se pueden elegir al reprogramar.
   const [today] = useState(startOfToday)
+  // Momento en que se eligió el día (como en la reserva): sirve para desactivar las horas ya pasadas de hoy.
+  const [now, setNow] = useState<Date | null>(null)
   const [cancelReason, setCancelReason] = useState('')
   const [cancelledCodes, setCancelledCodes] = useState<string[]>(() => {
     if (typeof window === 'undefined') return []
@@ -182,10 +184,14 @@ export default function ManageBooking() {
 
   function openReschedule() {
     if (!booking) return
+    const current = new Date()
     const dateIndex = rescheduleWeeks.findIndex((week) => week.some((date) => toDateKey(date) === booking.dateKey))
+    const bookedDate = rescheduleWeeks.flat().find((date) => toDateKey(date) === booking.dateKey) ?? null
+    setNow(current)
     setWeekIndex(dateIndex === -1 ? 0 : dateIndex)
     setNewDateKey(booking.dateKey)
-    setNewTime(booking.time)
+    // Si la hora de la cita ya pasó hoy, no se deja preseleccionada.
+    setNewTime(isPastTimeSlot(bookedDate, booking.time, current) ? '' : booking.time)
     setNotice('')
     setView('reschedule')
   }
@@ -198,7 +204,9 @@ export default function ManageBooking() {
 
   function selectNewDate(date: Date) {
     const key = toDateKey(date)
-    if (key !== newDateKey) setNewTime('')
+    const current = new Date()
+    setNow(current)
+    if (key !== newDateKey || (newTime && isPastTimeSlot(date, newTime, current))) setNewTime('')
     setNewDateKey(key)
   }
 
@@ -397,7 +405,7 @@ export default function ManageBooking() {
                     <h3>{group.label}</h3>
                     <div className="time-grid">
                       {group.items.map((item) => {
-                        const unavailable = unavailableTimes.includes(item)
+                        const unavailable = unavailableTimes.includes(item) || isPastTimeSlot(selectedDate, item, now)
                         return (
                           <button
                             type="button"

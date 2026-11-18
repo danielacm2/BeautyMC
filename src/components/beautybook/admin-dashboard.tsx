@@ -607,7 +607,7 @@ function EditProfessionalModal({ initial, onClose, onSave }: { initial: Professi
       setError('Selecciona los días y el rango de horas del horario laboral.')
       return
     }
-    if (timeToMinutes(schedEnd) <= timeToMinutes(schedStart)) {
+    if (isInvalidTimeRange(schedStart, schedEnd)) {
       setError('La hora de salida debe ser posterior a la hora de entrada.')
       return
     }
@@ -648,9 +648,20 @@ const weekDayOptions = [
   { value: 'Sábado', short: 'Sáb' },
 ]
 
-function timeToMinutes(value: string) {
-  const [hours, minutes] = value.split(':').map(Number)
-  return hours * 60 + minutes
+// Minutos desde las 00:00. Acepta "HH:MM" (24 horas, como los horarios de demostración) y
+// "hh:mm a.m./p.m." (el formato que entrega TimePicker). Devuelve null si no reconoce la hora.
+function timeToMinutes(value: string): number | null {
+  const display = parseDisplayTime(value)
+  if (display) return ((Number(display.hour) % 12) + (display.period === 'p.m.' ? 12 : 0)) * 60 + Number(display.minute)
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})$/)
+  return match ? Number(match[1]) * 60 + Number(match[2]) : null
+}
+
+// La salida debe ser posterior a la entrada. Si alguna hora no se reconoce no se bloquea el guardado.
+function isInvalidTimeRange(start: string, end: string) {
+  const startMinutes = timeToMinutes(start)
+  const endMinutes = timeToMinutes(end)
+  return startMinutes !== null && endMinutes !== null && endMinutes <= startMinutes
 }
 
 function MultiDayPicker({ selected, onChange, label }: { selected: string[]; onChange: (days: string[]) => void; label: string }) {
@@ -731,7 +742,7 @@ function AddProfessionalModal({ onClose, onSave }: { onClose: () => void; onSave
       setError('Selecciona los días y el rango de horas del horario laboral.')
       return
     }
-    if (timeToMinutes(schedEnd) <= timeToMinutes(schedStart)) {
+    if (isInvalidTimeRange(schedStart, schedEnd)) {
       setError('La hora de salida debe ser posterior a la hora de entrada.')
       return
     }

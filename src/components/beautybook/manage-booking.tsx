@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Asterisk, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, User, X } from 'lucide-react'
+import { normalizeDateKey, startOfToday, toDateKey } from '@/lib/date-utils'
+import { getDemoBusyTimes, getDemoDayTimes, getDemoWeeks } from '@/lib/demo-availability'
 import { capitalize, formatCOP } from '@/lib/utils'
 
 type BookingStatus = 'confirmed' | 'cancelled' | 'expired'
@@ -53,32 +55,9 @@ const sampleBookings: ManagedBooking[] = [
   },
 ]
 
-const weekdayTimes = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00']
-const saturdayTimes = ['10:00', '11:00', '12:00', '13:00', '14:00']
-const unavailableTimesByDay: Record<number, string[]> = {
-  0: [],
-  1: ['12:00', '16:00'],
-  2: ['11:00', '15:00', '18:00'],
-  3: ['13:00', '17:00'],
-  4: ['10:00', '14:00', '19:00'],
-  5: ['12:00', '18:00'],
-  6: ['11:00', '13:00'],
-}
+// Semanas de ejemplo (sin backend). Aquí todas tienen horarios, a diferencia de la reserva.
+const rescheduleWeeks = getDemoWeeks().map((week) => week.days)
 
-function buildWeek(year: number, month: number, day: number) {
-  return Array.from({ length: 7 }, (_, offset) => new Date(year, month - 1, day + offset))
-}
-
-const rescheduleWeeks = [
-  buildWeek(2026, 11, 16),
-  buildWeek(2026, 11, 23),
-  buildWeek(2026, 11, 30),
-  buildWeek(2026, 12, 7),
-  buildWeek(2026, 12, 14),
-  buildWeek(2026, 12, 21),
-]
-
-const keyOfDate = (date: Date) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
 const formatLongDate = (date: Date) => longDate.format(date).replace(',', '')
 
 const cancelReasons = ['Cambio de planes', 'Encontré otro horario', 'Un imprevisto', 'Otro']
@@ -97,11 +76,7 @@ export default function ManageBooking() {
   const [newTime, setNewTime] = useState('')
   const [cancelOpen, setCancelOpen] = useState(false)
   // Inicio del día de hoy: los días anteriores no se pueden elegir al reprogramar.
-  const [today] = useState(() => {
-    const start = new Date()
-    start.setHours(0, 0, 0, 0)
-    return start
-  })
+  const [today] = useState(startOfToday)
   const [cancelReason, setCancelReason] = useState('')
   const [cancelledCodes, setCancelledCodes] = useState<string[]>(() => {
     if (typeof window === 'undefined') return []
@@ -124,7 +99,8 @@ export default function ManageBooking() {
       if (parsed?.code && parsed?.service) {
         timer = setTimeout(() => {
           sessionStorage.removeItem(STORAGE_KEY)
-          setBooking(parsed)
+          // Las reservas guardadas con el formato anterior de fecha (sin ceros) se convierten al estándar.
+          setBooking({ ...parsed, dateKey: normalizeDateKey(parsed.dateKey) })
           setView('detail')
         }, 0)
       }
@@ -176,10 +152,10 @@ export default function ManageBooking() {
   }, [cancelOpen])
 
   const currentWeek = rescheduleWeeks[weekIndex]
-  const selectedDate = rescheduleWeeks.flat().find((date) => keyOfDate(date) === newDateKey) ?? null
+  const selectedDate = rescheduleWeeks.flat().find((date) => toDateKey(date) === newDateKey) ?? null
   const selectedWeekday = selectedDate ? selectedDate.getDay() : null
-  const dayTimes = selectedWeekday === 6 ? saturdayTimes : selectedWeekday === 0 || selectedWeekday === null ? [] : weekdayTimes
-  const unavailableTimes = selectedWeekday !== null ? unavailableTimesByDay[selectedWeekday] ?? [] : []
+  const dayTimes = selectedWeekday === null ? [] : getDemoDayTimes(selectedWeekday)
+  const unavailableTimes = selectedWeekday !== null ? getDemoBusyTimes(selectedWeekday) : []
   const weekLabel = capitalize(monthTitle.format(currentWeek[0]))
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
@@ -206,7 +182,7 @@ export default function ManageBooking() {
 
   function openReschedule() {
     if (!booking) return
-    const dateIndex = rescheduleWeeks.findIndex((week) => week.some((date) => keyOfDate(date) === booking.dateKey))
+    const dateIndex = rescheduleWeeks.findIndex((week) => week.some((date) => toDateKey(date) === booking.dateKey))
     setWeekIndex(dateIndex === -1 ? 0 : dateIndex)
     setNewDateKey(booking.dateKey)
     setNewTime(booking.time)
@@ -221,7 +197,7 @@ export default function ManageBooking() {
   }
 
   function selectNewDate(date: Date) {
-    const key = keyOfDate(date)
+    const key = toDateKey(date)
     if (key !== newDateKey) setNewTime('')
     setNewDateKey(key)
   }
@@ -389,12 +365,12 @@ export default function ManageBooking() {
               {currentWeek.map((date) => {
                 const closed = date.getDay() === 0
                 const unavailable = closed || date < today
-                const selected = newDateKey === keyOfDate(date)
+                const selected = newDateKey === toDateKey(date)
                 const isMonthStart = date.getDate() === 1
                 return (
                   <button
                     type="button"
-                    key={keyOfDate(date)}
+                    key={toDateKey(date)}
                     disabled={unavailable}
                     className={`date-option ${selected ? 'selected' : ''} ${unavailable ? 'unavailable' : ''}`}
                     onClick={() => selectNewDate(date)}

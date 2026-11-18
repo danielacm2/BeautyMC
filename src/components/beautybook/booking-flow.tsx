@@ -5,55 +5,18 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, ArrowRight, Asterisk, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, MapPin, User, X } from 'lucide-react'
 import { professionals, serviceProfessionals, services } from '@/lib/beautybook-data'
+import { isPastTimeSlot, isSameDay, startOfToday, toDateKey } from '@/lib/date-utils'
+import { getDemoBusyTimes, getDemoDayTimes, getDemoWeeks } from '@/lib/demo-availability'
 import { getServiceIcon } from '@/lib/service-icons'
 import { capitalize, formatCOP } from '@/lib/utils'
 import { isValidEmail } from '@/lib/validation'
 
 const steps = ['Servicio', 'Profesional', 'Fecha y hora', 'Tus datos', 'Confirmación']
-const weekdayTimes = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00']
-const saturdayTimes = ['10:00', '11:00', '12:00', '13:00', '14:00']
-// Datos de ejemplo fijos: 2 o 3 horas ocupadas por día (0 = domingo).
-const unavailableTimesByDay: Record<number, string[]> = {
-  0: [],
-  1: ['12:00', '16:00'],
-  2: ['11:00', '15:00', '18:00'],
-  3: ['13:00', '17:00'],
-  4: ['10:00', '14:00', '19:00'],
-  5: ['12:00', '18:00'],
-  6: ['11:00', '13:00'],
-}
 const weekday = new Intl.DateTimeFormat('es-ES', { weekday: 'short' })
 const monthShort = new Intl.DateTimeFormat('es-ES', { month: 'short' })
 
-type SampleWeek = { days: Date[]; hasSchedule: boolean }
-
-function buildSampleWeek(year: number, month: number, day: number, hasSchedule = true): SampleWeek {
-  return {
-    days: Array.from({ length: 7 }, (_, offset) => new Date(year, month - 1, day + offset)),
-    hasSchedule,
-  }
-}
-
-// Semanas de ejemplo fijas (sin backend): seis semanas, una de ellas sin horarios.
-const sampleWeeks: SampleWeek[] = [
-  buildSampleWeek(2026, 11, 16),
-  buildSampleWeek(2026, 11, 23),
-  buildSampleWeek(2026, 11, 30),
-  buildSampleWeek(2026, 12, 7, false),
-  buildSampleWeek(2026, 12, 14),
-  buildSampleWeek(2026, 12, 21),
-]
-
-const dateKey = (date: Date) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
-const isSameDay = (first: Date, second: Date) => first.getFullYear() === second.getFullYear() && first.getMonth() === second.getMonth() && first.getDate() === second.getDate()
-const timeInMinutes = (value: string) => {
-  const [hours, minutes] = value.split(':').map(Number)
-  return hours * 60 + minutes
-}
-const isPastTimeSlot = (date: Date | null, value: string, now: Date | null) => {
-  if (!date || !now || !isSameDay(date, now)) return false
-  return timeInMinutes(value) < now.getHours() * 60 + now.getMinutes()
-}
+// Semanas de ejemplo (sin backend). En reserva la semana del 7 de diciembre no tiene horarios.
+const sampleWeeks = getDemoWeeks({ emptyWeekStarts: ['2026-12-07'] })
 
 // Texto de ejemplo de la política de privacidad (sin backend).
 const privacyUpdated = '16 de noviembre de 2026'
@@ -92,11 +55,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
   const [time, setTime] = useState('')
   const [now, setNow] = useState<Date | null>(null)
   // Inicio del día de hoy: los días anteriores no se pueden reservar.
-  const [today] = useState(() => {
-    const start = new Date()
-    start.setHours(0, 0, 0, 0)
-    return start
-  })
+  const [today] = useState(startOfToday)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -136,7 +95,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
   const selectedDate = useMemo(() => {
     if (!selectedDateKey) return null
     for (const week of sampleWeeks) {
-      const match = week.days.find((date) => dateKey(date) === selectedDateKey)
+      const match = week.days.find((date) => toDateKey(date) === selectedDateKey)
       if (match) return match
     }
     return null
@@ -167,8 +126,8 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
   }, [selectedDate])
   const selectedWeekday = selectedDate ? selectedDate.getDay() : 1
   const selectedInCurrentWeek = selectedDate ? currentWeek.days.some((date) => isSameDay(date, selectedDate)) : false
-  const dayTimes = selectedWeekday === 6 ? saturdayTimes : selectedWeekday === 0 ? [] : weekdayTimes
-  const unavailableTimes = unavailableTimesByDay[selectedWeekday] ?? []
+  const dayTimes = getDemoDayTimes(selectedWeekday)
+  const unavailableTimes = getDemoBusyTimes(selectedWeekday)
   const confirmationDate = summaryDate ? `${summaryDate.replace(',', '')}${time ? `, ${time}` : ''}` : 'Sin seleccionar'
   const detailsComplete = Boolean(name.trim() && email.trim() && phone.trim())
   const confirmBlocked = detailsComplete && !acceptedPrivacy
@@ -188,7 +147,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
   }
 
   function selectDate(date: Date) {
-    const key = dateKey(date)
+    const key = toDateKey(date)
     const current = new Date()
     setNow(current)
     setError('')
@@ -338,12 +297,12 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
             {currentWeek.days.map((date) => {
               const closed = date.getDay() === 0
               const unavailable = closed || date < today
-              const selected = selectedDateKey === dateKey(date)
+              const selected = selectedDateKey === toDateKey(date)
               const isMonthStart = date.getDate() === 1
               return (
                 <button
                   type="button"
-                  key={dateKey(date)}
+                  key={toDateKey(date)}
                   disabled={unavailable}
                   className={`date-option ${selected ? 'selected' : ''} ${unavailable ? 'unavailable' : ''}`}
                   onClick={() => selectDate(date)}

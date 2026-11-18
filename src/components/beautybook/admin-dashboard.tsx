@@ -54,9 +54,18 @@ export default function AdminDashboard() {
   const title = navItems.find((item) => item.id === view)?.label ?? 'Inicio'
   const detailAppointment = modal?.kind === 'appointment' ? (appointments.find((item) => item.id === modal.appointment.id) ?? modal.appointment) : null
 
+  const toastTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current !== null) window.clearTimeout(toastTimer.current)
+    }
+  }, [])
+
   function notify(message: string) {
     setToast(message)
-    window.setTimeout(() => setToast(''), 2600)
+    if (toastTimer.current !== null) window.clearTimeout(toastTimer.current)
+    toastTimer.current = window.setTimeout(() => setToast(''), 2600)
   }
 
   const [editingId, setEditingId] = useState<string | null>(null)

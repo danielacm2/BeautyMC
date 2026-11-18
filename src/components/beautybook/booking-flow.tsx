@@ -97,6 +97,12 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null)
   const [time, setTime] = useState('')
   const [now, setNow] = useState<Date | null>(null)
+  // Inicio del día de hoy: los días anteriores no se pueden reservar.
+  const [today] = useState(() => {
+    const start = new Date()
+    start.setHours(0, 0, 0, 0)
+    return start
+  })
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -166,6 +172,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
     return label.charAt(0).toUpperCase() + label.slice(1)
   }, [selectedDate])
   const selectedWeekday = selectedDate ? selectedDate.getDay() : 1
+  const selectedInCurrentWeek = selectedDate ? currentWeek.days.some((date) => isSameDay(date, selectedDate)) : false
   const dayTimes = selectedWeekday === 6 ? saturdayTimes : selectedWeekday === 0 ? [] : weekdayTimes
   const unavailableTimes = unavailableTimesByDay[selectedWeekday] ?? []
   const confirmationDate = summaryDate ? `${summaryDate.replace(',', '')}${time ? `, ${time}` : ''}` : 'Sin seleccionar'
@@ -335,7 +342,8 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
           </div>
           <div key={weekIndex} className={`date-picker week-slide-${slideDirection}`}>
             {currentWeek.days.map((date) => {
-              const unavailable = date.getDay() === 0
+              const closed = date.getDay() === 0
+              const unavailable = closed || date < today
               const selected = selectedDateKey === dateKey(date)
               const isMonthStart = date.getDate() === 1
               return (
@@ -350,12 +358,16 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
                   <span className="date-weekday">{weekday.format(date).replace('.', '').toUpperCase()}</span>
                   <strong>{date.getDate()}</strong>
                   {isMonthStart && <span className="date-month">{monthShort.format(date).replace('.', '')}</span>}
-                  {unavailable && <span className="date-closed">Cerrado</span>}
+                  {closed && <span className="date-closed">Cerrado</span>}
                 </button>
               )
             })}
           </div>
-          {currentWeek.hasSchedule ? (
+          {currentWeek.hasSchedule && !selectedInCurrentWeek ? (
+            <div className="week-empty">
+              <p>Elige un día para ver las horas disponibles.</p>
+            </div>
+          ) : currentWeek.hasSchedule ? (
             <>
               <div className="available-label"><Clock3 size={14} /> HORAS DISPONIBLES</div>
               {[
@@ -504,7 +516,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
           <span className="success-icon" aria-hidden="true"><Check size={32} /></span>
           <span className="eyebrow">TODO LISTO, {name.split(' ')[0].toUpperCase()}</span>
           <h2 className="confirmation-heading">Tu momento ya<br /><em>está reservado.</em></h2>
-          <p className="confirmation-message">Enviamos los detalles de tu cita a <strong>{email || 'dani@gmail.com'}</strong>.</p>
+          <p className="confirmation-message">Enviamos los detalles de tu cita a <strong>{email}</strong>.</p>
           <div className="confirmation-columns">
             <aside className="confirmation-summary" aria-label="Resumen de tu cita">
               <div className="confirmation-summary-head">
@@ -557,7 +569,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
                   try {
                     sessionStorage.setItem('beautymc-manage-booking', JSON.stringify({
                       code: 'BMC-24A7',
-                      email: email.trim() || 'dani@gmail.com',
+                      email: email.trim(),
                       service: service?.name ?? 'Corte & peinado',
                       date: summaryDate ? summaryDate.replace(',', '') : 'martes 17 de noviembre',
                       dateKey: selectedDateKey ?? '2026-11-17',

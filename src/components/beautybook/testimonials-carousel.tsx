@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Star } from 'lucide-react'
 import type { Testimonial } from '@/lib/beautybook-data'
 
@@ -29,7 +29,13 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
   const programmaticScroll = useRef(false)
   const scrollTimeout = useRef<number | null>(null)
 
-  const scrollToIndex = (index: number, fromUser = false) => {
+  const activeRef = useRef(0)
+
+  useEffect(() => {
+    activeRef.current = active
+  }, [active])
+
+  const scrollToIndex = useCallback((index: number, fromUser = false) => {
     const viewport = viewportRef.current
     if (!viewport) return
     const card = viewport.querySelector<HTMLElement>('.testimonial-card')
@@ -43,7 +49,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
     scrollTimeout.current = window.setTimeout(() => {
       programmaticScroll.current = false
     }, 600)
-  }
+  }, [])
 
   useEffect(() => {
     const update = () => {
@@ -60,23 +66,10 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
   useEffect(() => {
     if (!autoPlay || steps <= 1) return
     const id = window.setInterval(() => {
-      setActive((current) => {
-        const next = (current + 1) % steps
-        const viewport = viewportRef.current
-        const card = viewport?.querySelector<HTMLElement>('.testimonial-card')
-        if (viewport && card) {
-          programmaticScroll.current = true
-          if (scrollTimeout.current) window.clearTimeout(scrollTimeout.current)
-          viewport.scrollTo({ left: next * (card.offsetWidth + 28), behavior: 'smooth' })
-          scrollTimeout.current = window.setTimeout(() => {
-            programmaticScroll.current = false
-          }, 600)
-        }
-        return next
-      })
+      scrollToIndex((activeRef.current + 1) % steps)
     }, 5200)
     return () => window.clearInterval(id)
-  }, [steps, autoPlay])
+  }, [steps, autoPlay, scrollToIndex])
 
   const onScroll = () => {
     const viewport = viewportRef.current

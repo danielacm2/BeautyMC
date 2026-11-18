@@ -16,14 +16,14 @@ export type DemoAppointment = {
 }
 
 export const demoAppointments: DemoAppointment[] = [
-  { id: 'BB-1048', customer: 'Lucía Moreno', initials: 'LM', phone: '+34 612 345 872', email: 'lucia.moreno@email.com', service: 'Corte & peinado', professional: 'Laura Martín', date: 'Hoy, 14 nov.', time: '10:00', price: 200000, status: 'Confirmada' },
-  { id: 'BB-1049', customer: 'Marta Sánchez', initials: 'MS', phone: '+34 678 231 490', email: 'marta.s@email.com', service: 'Manicura esencial', professional: 'Clara Ruiz', date: 'Hoy, 14 nov.', time: '10:30', price: 145000, status: 'Confirmada' },
-  { id: 'BB-1050', customer: 'Elena Torres', initials: 'ET', phone: '+34 611 904 637', email: 'elena.t@email.com', service: 'Diseño de cejas', professional: 'Inés Vega', date: 'Hoy, 14 nov.', time: '11:00', price: 110000, status: 'Pendiente' },
-  { id: 'BB-1051', customer: 'Paula Romero', initials: 'PR', phone: '+34 633 540 218', email: 'paula.r@email.com', service: 'Maquillaje especial', professional: 'Laura Martín', date: 'Hoy, 14 nov.', time: '12:00', price: 260000, status: 'Confirmada' },
-  { id: 'BB-1052', customer: 'Sofía Castillo', initials: 'SC', phone: '+34 622 485 913', email: 'sofia.c@email.com', service: 'Lifting & mirada', professional: 'Inés Vega', date: 'Hoy, 14 nov.', time: '13:30', price: 170000, status: 'Pendiente' },
-  { id: 'BB-1053', customer: 'Carmen Díaz', initials: 'CD', phone: '+34 697 124 508', email: 'carmen.d@email.com', service: 'Corte & peinado', professional: 'Laura Martín', date: 'Lun, 16 nov.', time: '10:30', price: 200000, status: 'Confirmada' },
-  { id: 'BB-1054', customer: 'Irene Vidal', initials: 'IV', phone: '+34 655 730 196', email: 'irene.v@email.com', service: 'Manicura esencial', professional: 'Clara Ruiz', date: 'Lun, 16 nov.', time: '12:00', price: 145000, status: 'Confirmada' },
-  { id: 'BB-1055', customer: 'Nuria Blanco', initials: 'NB', phone: '+34 644 291 365', email: 'nuria.b@email.com', service: 'Maquillaje especial', professional: 'Inés Vega', date: 'Mar, 17 nov.', time: '16:00', price: 260000, status: 'Pendiente' },
+  { id: 'BB-1048', customer: 'Lucía Moreno', initials: 'LM', phone: '+57 312 345 8720', email: 'lucia.moreno@email.com', service: 'Corte & peinado', professional: 'Laura Martín', date: 'Hoy, 14 nov.', time: '10:00', price: 200000, status: 'Confirmada' },
+  { id: 'BB-1049', customer: 'Marta Sánchez', initials: 'MS', phone: '+57 318 231 4901', email: 'marta.s@email.com', service: 'Manicura esencial', professional: 'Clara Ruiz', date: 'Hoy, 14 nov.', time: '10:30', price: 145000, status: 'Confirmada' },
+  { id: 'BB-1050', customer: 'Elena Torres', initials: 'ET', phone: '+57 311 904 6372', email: 'elena.t@email.com', service: 'Diseño de cejas', professional: 'Inés Vega', date: 'Hoy, 14 nov.', time: '11:00', price: 110000, status: 'Pendiente' },
+  { id: 'BB-1051', customer: 'Paula Romero', initials: 'PR', phone: '+57 300 540 2184', email: 'paula.r@email.com', service: 'Maquillaje especial', professional: 'Laura Martín', date: 'Hoy, 14 nov.', time: '12:00', price: 260000, status: 'Confirmada' },
+  { id: 'BB-1052', customer: 'Sofía Castillo', initials: 'SC', phone: '+57 322 485 9130', email: 'sofia.c@email.com', service: 'Lifting & mirada', professional: 'Inés Vega', date: 'Hoy, 14 nov.', time: '13:30', price: 170000, status: 'Pendiente' },
+  { id: 'BB-1053', customer: 'Carmen Díaz', initials: 'CD', phone: '+57 315 124 5086', email: 'carmen.d@email.com', service: 'Corte & peinado', professional: 'Laura Martín', date: 'Lun, 16 nov.', time: '10:30', price: 200000, status: 'Confirmada' },
+  { id: 'BB-1054', customer: 'Irene Vidal', initials: 'IV', phone: '+57 310 730 1967', email: 'irene.v@email.com', service: 'Manicura esencial', professional: 'Clara Ruiz', date: 'Lun, 16 nov.', time: '12:00', price: 145000, status: 'Confirmada' },
+  { id: 'BB-1055', customer: 'Nuria Blanco', initials: 'NB', phone: '+57 314 291 3658', email: 'nuria.b@email.com', service: 'Maquillaje especial', professional: 'Inés Vega', date: 'Mar, 17 nov.', time: '16:00', price: 260000, status: 'Pendiente' },
 ]
 
 export const demoServices = services.map((service) => ({ ...service, active: true }))

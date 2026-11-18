@@ -133,7 +133,7 @@
 .login-toggle { position:absolute; top:7px; right:7px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border:0; border-radius:8px; background:transparent; color:#5a4d45; cursor:pointer; transition:background-color .2s,color .2s; }
 .login-toggle:hover { background:#fbeedd; color:#2b221e; }
 .login-forgot-row { display:flex; justify-content:flex-end; margin-top:10px; }
-.login-forgot { font-size:15px; font-weight:600; color:#874a3d; text-decoration:underline; text-underline-offset:3px; }
+.login-forgot { padding:0; border:0; background:none; font-family:inherit; cursor:pointer; font-size:15px; font-weight:600; color:#874a3d; text-decoration:underline; text-underline-offset:3px; }
 .login-forgot:hover { color:#6f3a2f; }
 .login-error { margin:0; color:#8f4b3f; font-size:14px; line-height:1.5; }
 .button.login-submit { display:inline-flex; align-items:center; justify-content:center; width:100%; min-height:58px; height:58px; margin:4px 0 0; padding:0 22px; gap:12px; border-radius:8px; background:#a65c4b; font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; }

@@ -23,6 +23,7 @@ export default function LoginForm() {
   const [errors, setErrors] = useState<FieldErrors>({})
   const [submitting, setSubmitting] = useState(false)
   const [demoNotice, setDemoNotice] = useState(false)
+  const [forgotNotice, setForgotNotice] = useState(false)
   const emailRef = useRef<HTMLInputElement>(null)
   const passwordRef = useRef<HTMLInputElement>(null)
   const timer = useRef<number | undefined>(undefined)
@@ -33,6 +34,7 @@ export default function LoginForm() {
     event.preventDefault()
     if (submitting) return
     setDemoNotice(false)
+    setForgotNotice(false)
     const found = validate(email, password)
     setErrors(found)
     if (found.email) return emailRef.current?.focus()
@@ -62,10 +64,10 @@ export default function LoginForm() {
           <button type="button" className="login-toggle" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={showPassword} aria-controls="login-password">{showPassword ? <EyeOff size={20}/> : <Eye size={20}/>}</button>
         </div>
         {errors.password && <p className="login-error" id="login-password-error" role="alert">{errors.password}</p>}
-        <div className="login-forgot-row"><Link href="#" className="login-forgot">¿Olvidaste tu contraseña?</Link></div>
+        <div className="login-forgot-row"><button type="button" className="login-forgot" onClick={() => { setDemoNotice(false); setForgotNotice(true) }}>¿Olvidaste tu contraseña?</button></div>
       </div>
       <button type="submit" className="button login-submit" disabled={submitting}>{submitting ? 'Comprobando…' : 'Iniciar sesión'} {!submitting && <ArrowRight size={16}/>}</button>
-      <div className="login-status" role="status">{demoNotice && <p className="login-notice">La autenticación real todavía no está activada. Esto es una demostración: no se ha iniciado ninguna sesión.</p>}</div>
+      <div className="login-status" role="status">{forgotNotice && <p className="login-notice">La recuperación de contraseña todavía no está activada. Esto es una demostración: contacta con la administración del estudio.</p>}{demoNotice && <p className="login-notice">La autenticación real todavía no está activada. Esto es una demostración: no se ha iniciado ninguna sesión.</p>}</div>
     </form>
     <p className="login-help">¿Problemas para entrar? Contacta con la administración del estudio.</p>
     <div className="login-demo" aria-labelledby="login-demo-title">

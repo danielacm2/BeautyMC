@@ -31,7 +31,7 @@ const monthTitle = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'nume
 const sampleBookings: ManagedBooking[] = [
   {
     code: 'BMC-24A7',
-    email: 'dani@gmail.com',
+    email: 'demo@beautymc.test',
     service: 'Corte & peinado',
     date: 'martes 17 de noviembre',
     dateKey: '2026-11-17',
@@ -42,7 +42,7 @@ const sampleBookings: ManagedBooking[] = [
   },
   {
     code: 'BMC-OLD1',
-    email: 'dani@gmail.com',
+    email: 'demo@beautymc.test',
     service: 'Corte & peinado',
     date: 'martes 17 de noviembre',
     dateKey: '2026-11-17',
@@ -97,6 +97,12 @@ export default function ManageBooking() {
   const [newDateKey, setNewDateKey] = useState('')
   const [newTime, setNewTime] = useState('')
   const [cancelOpen, setCancelOpen] = useState(false)
+  // Inicio del día de hoy: los días anteriores no se pueden elegir al reprogramar.
+  const [today] = useState(() => {
+    const start = new Date()
+    start.setHours(0, 0, 0, 0)
+    return start
+  })
   const [cancelReason, setCancelReason] = useState('')
   const [cancelledCodes, setCancelledCodes] = useState<string[]>(() => {
     if (typeof window === 'undefined') return []
@@ -382,7 +388,8 @@ export default function ManageBooking() {
             </div>
             <div className="date-picker" key={weekIndex}>
               {currentWeek.map((date) => {
-                const unavailable = date.getDay() === 0
+                const closed = date.getDay() === 0
+                const unavailable = closed || date < today
                 const selected = newDateKey === keyOfDate(date)
                 const isMonthStart = date.getDate() === 1
                 return (
@@ -397,7 +404,7 @@ export default function ManageBooking() {
                     <span className="date-weekday">{weekdayShort.format(date).replace('.', '').toUpperCase()}</span>
                     <strong>{date.getDate()}</strong>
                     {isMonthStart && <span className="date-month">{monthShort.format(date).replace('.', '')}</span>}
-                    {unavailable && <span className="date-closed">Cerrado</span>}
+                    {closed && <span className="date-closed">Cerrado</span>}
                   </button>
                 )
               })}

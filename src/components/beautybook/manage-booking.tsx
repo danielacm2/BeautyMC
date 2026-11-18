@@ -56,7 +56,37 @@ const sampleBookings: ManagedBooking[] = [
 ]
 
 // Semanas de ejemplo (sin backend). Aquí todas tienen horarios, a diferencia de la reserva.
-const rescheduleWeeks = getDemoWeeks().map((week) => week.days)
+const demoWeeks = getDemoWeeks()
+const rescheduleWeeks = demoWeeks.map((week) => week.days)
+
+// Un día se puede elegir si no es pasado, tiene horas de atención (el domingo no) y su semana tiene horarios.
+function isDayAvailable(date: Date, today: Date) {
+  const week = demoWeeks.find((item) => item.days.some((day) => toDateKey(day) === toDateKey(date)))
+  return Boolean(week?.hasSchedule) && getDemoDayTimes(date.getDay()).length > 0 && date >= today
+}
+
+// Comprueba que una clave YYYY-MM-DD tenga formato válido y corresponda a una fecha real (p. ej. no 2026-02-31).
+function isRealDateKey(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  if (!match) return false
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])]
+  const date = new Date(year, month - 1, day)
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+}
+
+// Lee la cita que dejó la reserva en sessionStorage. Devuelve null si el contenido no es una cita válida.
+// Si la fecha o la hora no son válidas se dejan vacías (selección vacía) en lugar de rechazar la cita.
+function parseStoredBooking(raw: string): ManagedBooking | null {
+  const data: unknown = JSON.parse(raw)
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) return null
+  const stored = data as Partial<Record<keyof ManagedBooking, unknown>>
+  if (typeof stored.code !== 'string' || !stored.code) return null
+  if (typeof stored.service !== 'string' || !stored.service) return null
+  // Las reservas guardadas con el formato anterior de fecha (sin ceros) se convierten al estándar.
+  const dateKey = typeof stored.dateKey === 'string' ? normalizeDateKey(stored.dateKey) : ''
+  const time = typeof stored.time === 'string' ? stored.time : ''
+  return { ...(data as ManagedBooking), dateKey: isRealDateKey(dateKey) ? dateKey : '', time }
+}
 
 const formatLongDate = (date: Date) => longDate.format(date).replace(',', '')
 
@@ -97,12 +127,11 @@ export default function ManageBooking() {
     try {
       const raw = sessionStorage.getItem(STORAGE_KEY)
       if (!raw) return
-      const parsed = JSON.parse(raw) as ManagedBooking
-      if (parsed?.code && parsed?.service) {
+      const stored = parseStoredBooking(raw)
+      if (stored) {
         timer = setTimeout(() => {
           sessionStorage.removeItem(STORAGE_KEY)
-          // Las reservas guardadas con el formato anterior de fecha (sin ceros) se convierten al estándar.
-          setBooking({ ...parsed, dateKey: normalizeDateKey(parsed.dateKey) })
+          setBooking(stored)
           setView('detail')
         }, 0)
       }
@@ -159,6 +188,17 @@ export default function ManageBooking() {
   const dayTimes = selectedWeekday === null ? [] : getDemoDayTimes(selectedWeekday)
   const unavailableTimes = selectedWeekday !== null ? getDemoBusyTimes(selectedWeekday) : []
   const weekLabel = capitalize(monthTitle.format(currentWeek[0]))
+  // Guardar exige un día disponible (no pasado) y una hora válida para ese día que no haya pasado hoy.
+  // Que la hora figure como ocupada no lo impide: puede ser la propia cita que se está reprogramando.
+  const dayAvailable = selectedDate !== null && isDayAvailable(selectedDate, today)
+  const timeIsPast = isPastTimeSlot(selectedDate, newTime, now)
+  const timeAllowed = newTime !== '' && dayTimes.includes(newTime) && !timeIsPast
+  const canSave = dayAvailable && timeAllowed
+  const saveHelp = !dayAvailable
+    ? 'Elige un día disponible para continuar.'
+    : timeIsPast
+      ? 'Esa hora ya pasó. Elige otra.'
+      : 'Elige una hora para continuar.'
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -187,11 +227,18 @@ export default function ManageBooking() {
     const current = new Date()
     const dateIndex = rescheduleWeeks.findIndex((week) => week.some((date) => toDateKey(date) === booking.dateKey))
     const bookedDate = rescheduleWeeks.flat().find((date) => toDateKey(date) === booking.dateKey) ?? null
+    // Solo se preselecciona un día disponible; si es inválido, pasado o no disponible, no se marca ni día ni hora.
+    const dayOk = bookedDate !== null && isDayAvailable(bookedDate, today)
+    // Si el día es válido pero la hora no lo es o ya pasó hoy, se conserva el día y la hora queda sin seleccionar.
+    const timeOk =
+      bookedDate !== null &&
+      dayOk &&
+      getDemoDayTimes(bookedDate.getDay()).includes(booking.time) &&
+      !isPastTimeSlot(bookedDate, booking.time, current)
     setNow(current)
     setWeekIndex(dateIndex === -1 ? 0 : dateIndex)
-    setNewDateKey(booking.dateKey)
-    // Si la hora de la cita ya pasó hoy, no se deja preseleccionada.
-    setNewTime(isPastTimeSlot(bookedDate, booking.time, current) ? '' : booking.time)
+    setNewDateKey(dayOk ? booking.dateKey : '')
+    setNewTime(timeOk ? booking.time : '')
     setNotice('')
     setView('reschedule')
   }
@@ -211,7 +258,13 @@ export default function ManageBooking() {
   }
 
   function saveReschedule() {
-    if (!booking || !selectedDate || !newTime) return
+    if (!booking || !selectedDate || !canSave) return
+    // La hora pudo pasar mientras la pantalla seguía abierta: se vuelve a comprobar con la hora actual.
+    const current = new Date()
+    if (isPastTimeSlot(selectedDate, newTime, current)) {
+      setNow(current)
+      return
+    }
     setBooking({
       ...booking,
       date: formatLongDate(selectedDate),
@@ -372,7 +425,7 @@ export default function ManageBooking() {
             <div className="date-picker" key={weekIndex}>
               {currentWeek.map((date) => {
                 const closed = date.getDay() === 0
-                const unavailable = closed || date < today
+                const unavailable = !isDayAvailable(date, today)
                 const selected = newDateKey === toDateKey(date)
                 const isMonthStart = date.getDate() === 1
                 return (
@@ -430,9 +483,10 @@ export default function ManageBooking() {
               </>
             )}
           </div>
+          {!canSave && <p className="manage-help" id="manage-save-help" role="status">{saveHelp}</p>}
           <div className="manage-bar">
             <button type="button" className="manage-back" onClick={() => setView('detail')}><ArrowLeft size={16} /> Atrás</button>
-            <button type="button" className="manage-primary" onClick={saveReschedule} disabled={!newDateKey || !newTime}>Guardar cambio</button>
+            <button type="button" className="manage-primary" onClick={saveReschedule} disabled={!canSave} aria-describedby={canSave ? undefined : 'manage-save-help'}>Guardar cambio</button>
           </div>
         </section>
       )}

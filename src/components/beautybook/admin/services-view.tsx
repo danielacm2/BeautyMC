@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent 
 import Image from 'next/image'
 import { Check, Eye, ImagePlus, Pencil, Plus, Search, Sparkles, Trash2 } from 'lucide-react'
 import { demoServices } from '@/lib/dashboard-demo-data'
-import { FilterDropdown, Modal } from '@/components/beautybook/dashboard-ui'
+import { DeleteDialog, FilterDropdown, Modal } from '@/components/beautybook/dashboard-ui'
 import { formatCOP } from '@/lib/utils'
 import { categoryLabel, type ServiceDraft, type ServiceItem } from '@/components/beautybook/admin/admin-shared'
 
@@ -68,60 +68,26 @@ function DeleteServiceModal({
   onClose: () => void
   onConfirm: () => void
 }) {
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
   return (
-    <div
-      className="bb-modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
+    <DeleteDialog
+      titleId="bb-delete-service-title"
+      descriptionId="bb-delete-service-description"
+      icon={Trash2}
+      title="¿Eliminar este servicio?"
+      description="Estás a punto de eliminar permanentemente este servicio del catálogo. Esta acción no se puede deshacer."
+      confirmLabel="Sí, eliminar"
+      onClose={onClose}
+      onConfirm={onConfirm}
     >
-      <section
-        className="bb-delete-card"
-        role="alertdialog"
-        aria-modal="true"
-        aria-labelledby="bb-delete-service-title"
-        aria-describedby="bb-delete-service-description"
-      >
-        <button type="button" className="bb-detail-close" onClick={onClose} aria-label="Cerrar">
-          ×
-        </button>
-        <span className="bb-delete-icon" aria-hidden="true">
-          <Trash2 />
-        </span>
-        <h2 id="bb-delete-service-title">¿Eliminar este servicio?</h2>
-        <p id="bb-delete-service-description">
-          Estás a punto de eliminar permanentemente este servicio del catálogo. Esta acción no se puede deshacer.
-        </p>
-        <div className="bb-delete-summary">
-          <div className="bb-delete-top">
-            <strong>{service.category}</strong>
-            <span>{formatCOP(service.price)}</span>
-          </div>
-          <strong className="bb-delete-name">{service.name}</strong>
-          <span className="bb-delete-service">{service.description}</span>
-        </div>
-        <div className="bb-delete-actions">
-          <button type="button" className="bb-delete-cancel" onClick={onClose}>
-            Cancelar
-          </button>
-          <button type="button" className="bb-delete-confirm" onClick={onConfirm}>
-            <Trash2 aria-hidden="true" />
-            Sí, eliminar
-          </button>
-        </div>
-      </section>
-    </div>
+      <div className="bb-delete-top">
+        <strong>{service.category}</strong>
+        <span>{formatCOP(service.price)}</span>
+      </div>
+      <strong className="bb-delete-name">{service.name}</strong>
+      <span className="bb-delete-service">{service.description}</span>
+    </DeleteDialog>
   )
 }
-
 const NEW_SERVICE_CATEGORY = '__nueva__'
 
 export function ServiceFormModal({

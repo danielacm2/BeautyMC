@@ -16,7 +16,7 @@ import {
   User,
 } from 'lucide-react'
 import { demoProfessionals, demoServices, type DemoAppointment } from '@/lib/dashboard-demo-data'
-import { FilterDropdown, Modal } from '@/components/beautybook/dashboard-ui'
+import { DeleteDialog, FilterDropdown, Modal } from '@/components/beautybook/dashboard-ui'
 import { formatCOP } from '@/lib/utils'
 import { isValidEmail } from '@/lib/validation'
 import { formatAgendaDate, initialsOf, type AppointmentDraft } from '@/components/beautybook/admin/admin-shared'
@@ -271,64 +271,30 @@ function DeleteAppointmentModal({
   onClose: () => void
   onConfirm: () => void
 }) {
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
   return (
-    <div
-      className="bb-modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
+    <DeleteDialog
+      titleId="bb-delete-title"
+      descriptionId="bb-delete-description"
+      icon={Trash2}
+      title="¿Eliminar esta cita?"
+      description="Estás a punto de eliminar permanentemente esta reserva de la agenda. Esta acción no se puede deshacer."
+      confirmLabel="Sí, eliminar"
+      onClose={onClose}
+      onConfirm={onConfirm}
     >
-      <section
-        className="bb-delete-card"
-        role="alertdialog"
-        aria-modal="true"
-        aria-labelledby="bb-delete-title"
-        aria-describedby="bb-delete-description"
-      >
-        <button type="button" className="bb-detail-close" onClick={onClose} aria-label="Cerrar">
-          ×
-        </button>
-        <span className="bb-delete-icon" aria-hidden="true">
-          <Trash2 />
+      <div className="bb-delete-top">
+        <strong>{appointment.id}</strong>
+        <span>
+          {appointment.date} · {appointment.time} — {appointment.professional}
         </span>
-        <h2 id="bb-delete-title">¿Eliminar esta cita?</h2>
-        <p id="bb-delete-description">
-          Estás a punto de eliminar permanentemente esta reserva de la agenda. Esta acción no se puede deshacer.
-        </p>
-        <div className="bb-delete-summary">
-          <div className="bb-delete-top">
-            <strong>{appointment.id}</strong>
-            <span>
-              {appointment.date} · {appointment.time} — {appointment.professional}
-            </span>
-          </div>
-          <strong className="bb-delete-name">{appointment.customer}</strong>
-          <span className="bb-delete-service">
-            {appointment.service} · {formatCOP(appointment.price)}
-          </span>
-        </div>
-        <div className="bb-delete-actions">
-          <button type="button" className="bb-delete-cancel" onClick={onClose}>
-            Cancelar
-          </button>
-          <button type="button" className="bb-delete-confirm" onClick={onConfirm}>
-            <Trash2 aria-hidden="true" />
-            Sí, eliminar
-          </button>
-        </div>
-      </section>
-    </div>
+      </div>
+      <strong className="bb-delete-name">{appointment.customer}</strong>
+      <span className="bb-delete-service">
+        {appointment.service} · {formatCOP(appointment.price)}
+      </span>
+    </DeleteDialog>
   )
 }
-
 export function AppointmentsView({
   appointments,
   onOpen,

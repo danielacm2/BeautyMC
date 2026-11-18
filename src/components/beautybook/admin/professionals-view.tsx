@@ -16,7 +16,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { demoProfessionals, demoServices, type DemoAppointment } from '@/lib/dashboard-demo-data'
-import { Modal, StatusBadge } from '@/components/beautybook/dashboard-ui'
+import { DeleteDialog, Modal, StatusBadge } from '@/components/beautybook/dashboard-ui'
 import { isValidEmail } from '@/lib/validation'
 import { serviceProfessionals } from '@/lib/beautybook-data'
 import { TimePicker, parseDisplayTime } from '@/components/beautybook/admin/time-picker'
@@ -433,60 +433,26 @@ function DeleteProfessionalModal({
   onClose: () => void
   onConfirm: () => void
 }) {
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
   return (
-    <div
-      className="bb-modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
+    <DeleteDialog
+      titleId="bb-delete-pro-title"
+      descriptionId="bb-delete-pro-description"
+      icon={Trash2}
+      title="¿Eliminar este profesional?"
+      description="Estás a punto de eliminar permanentemente este perfil del equipo. Esta acción no se puede deshacer."
+      confirmLabel="Sí, eliminar"
+      onClose={onClose}
+      onConfirm={onConfirm}
     >
-      <section
-        className="bb-delete-card"
-        role="alertdialog"
-        aria-modal="true"
-        aria-labelledby="bb-delete-pro-title"
-        aria-describedby="bb-delete-pro-description"
-      >
-        <button type="button" className="bb-detail-close" onClick={onClose} aria-label="Cerrar">
-          ×
-        </button>
-        <span className="bb-delete-icon" aria-hidden="true">
-          <Trash2 />
-        </span>
-        <h2 id="bb-delete-pro-title">¿Eliminar este profesional?</h2>
-        <p id="bb-delete-pro-description">
-          Estás a punto de eliminar permanentemente este perfil del equipo. Esta acción no se puede deshacer.
-        </p>
-        <div className="bb-delete-summary">
-          <div className="bb-delete-top">
-            <strong>{professional.specialty.toUpperCase()}</strong>
-            <span>{professional.schedule}</span>
-          </div>
-          <strong className="bb-delete-name">{professional.name}</strong>
-          <span className="bb-delete-service">{professional.appointments} citas esta semana</span>
-        </div>
-        <div className="bb-delete-actions">
-          <button type="button" className="bb-delete-cancel" onClick={onClose}>
-            Cancelar
-          </button>
-          <button type="button" className="bb-delete-confirm" onClick={onConfirm}>
-            <Trash2 aria-hidden="true" />
-            Sí, eliminar
-          </button>
-        </div>
-      </section>
-    </div>
+      <div className="bb-delete-top">
+        <strong>{professional.specialty.toUpperCase()}</strong>
+        <span>{professional.schedule}</span>
+      </div>
+      <strong className="bb-delete-name">{professional.name}</strong>
+      <span className="bb-delete-service">{professional.appointments} citas esta semana</span>
+    </DeleteDialog>
   )
 }
-
 const weekDayOptions = [
   { value: 'Lunes', short: 'Lun' },
   { value: 'Martes', short: 'Mar' },

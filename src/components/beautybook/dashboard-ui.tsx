@@ -61,6 +61,72 @@ export function Modal({ title, description, onClose, children }: { title: string
   return <div className="bb-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}><section ref={modalRef} className="bb-modal" role="dialog" aria-modal="true" aria-labelledby="bb-modal-title" onKeyDown={handleKeyDown}><button className="bb-modal-close" onClick={onClose} aria-label="Cerrar">×</button><span className="bb-eyebrow">BEAUTYMC</span><h2 id="bb-modal-title">{title}</h2>{description && <p className="bb-modal-description">{description}</p>}{children}</section></div>
 }
 
+export function DeleteDialog({
+  titleId,
+  descriptionId,
+  icon: Icon,
+  title,
+  description,
+  confirmLabel,
+  onClose,
+  onConfirm,
+  children,
+}: {
+  titleId: string
+  descriptionId: string
+  icon: LucideIcon
+  title: string
+  description: string
+  confirmLabel: string
+  onClose: () => void
+  onConfirm: () => void
+  children: React.ReactNode
+}) {
+  useEffect(() => {
+    function handleKeyDown(event: globalThis.KeyboardEvent) {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+  return (
+    <div
+      className="bb-modal-backdrop"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
+    >
+      <section
+        className="bb-delete-card"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+      >
+        <button type="button" className="bb-detail-close" onClick={onClose} aria-label="Cerrar">
+          ×
+        </button>
+        <span className="bb-delete-icon" aria-hidden="true">
+          <Icon />
+        </span>
+        <h2 id={titleId}>{title}</h2>
+        <p id={descriptionId}>{description}</p>
+        <div className="bb-delete-summary">{children}</div>
+        <div className="bb-delete-actions">
+          <button type="button" className="bb-delete-cancel" onClick={onClose}>
+            Cancelar
+          </button>
+          <button type="button" className="bb-delete-confirm" onClick={onConfirm}>
+            <Icon aria-hidden="true" />
+            {confirmLabel}
+          </button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 export function AppointmentStatusDot({ status }: { status: string }) {
   return <span className={`bb-calendar-status ${statusClass[status] ?? ''}`}><i aria-hidden="true" />{status}</span>
 }

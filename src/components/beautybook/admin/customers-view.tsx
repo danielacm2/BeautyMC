@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { ArrowUpDown, Check, Clock3, Eye, MessageCircle, Pencil, Plus, Search, Sparkles, Trash2 } from 'lucide-react'
 import { demoCustomers, demoServices, type DemoAppointment } from '@/lib/dashboard-demo-data'
-import { FilterDropdown, Modal } from '@/components/beautybook/dashboard-ui'
+import { DeleteDialog, FilterDropdown, Modal } from '@/components/beautybook/dashboard-ui'
 import { formatCOP } from '@/lib/utils'
 import { isValidEmail } from '@/lib/validation'
 import {
@@ -503,64 +503,30 @@ function CustomerDeleteModal({
   onClose: () => void
   onConfirm: () => void
 }) {
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
   return (
-    <div
-      className="bb-modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
+    <DeleteDialog
+      titleId="bb-delete-customer-title"
+      descriptionId="bb-delete-customer-description"
+      icon={Trash2}
+      title="¿Eliminar este cliente?"
+      description="Estás a punto de eliminar permanentemente este perfil de la comunidad. Esta acción no se puede deshacer."
+      confirmLabel="Sí, eliminar"
+      onClose={onClose}
+      onConfirm={onConfirm}
     >
-      <section
-        className="bb-delete-card"
-        role="alertdialog"
-        aria-modal="true"
-        aria-labelledby="bb-delete-customer-title"
-        aria-describedby="bb-delete-customer-description"
-      >
-        <button type="button" className="bb-detail-close" onClick={onClose} aria-label="Cerrar">
-          ×
-        </button>
-        <span className="bb-delete-icon" aria-hidden="true">
-          <Trash2 />
+      <div className="bb-delete-top">
+        <strong>{customer.vip ? 'CLIENTE VIP' : 'CLIENTE'}</strong>
+        <span>
+          {customer.visits} visitas · Cliente desde {customer.memberSince}
         </span>
-        <h2 id="bb-delete-customer-title">¿Eliminar este cliente?</h2>
-        <p id="bb-delete-customer-description">
-          Estás a punto de eliminar permanentemente este perfil de la comunidad. Esta acción no se puede deshacer.
-        </p>
-        <div className="bb-delete-summary">
-          <div className="bb-delete-top">
-            <strong>{customer.vip ? 'CLIENTE VIP' : 'CLIENTE'}</strong>
-            <span>
-              {customer.visits} visitas · Cliente desde {customer.memberSince}
-            </span>
-          </div>
-          <strong className="bb-delete-name">{customer.name}</strong>
-          <span className="bb-delete-service">
-            {customer.email || 'Sin correo'} · {customer.phone}
-          </span>
-        </div>
-        <div className="bb-delete-actions">
-          <button type="button" className="bb-delete-cancel" onClick={onClose}>
-            Cancelar
-          </button>
-          <button type="button" className="bb-delete-confirm" onClick={onConfirm}>
-            <Trash2 aria-hidden="true" />
-            Sí, eliminar
-          </button>
-        </div>
-      </section>
-    </div>
+      </div>
+      <strong className="bb-delete-name">{customer.name}</strong>
+      <span className="bb-delete-service">
+        {customer.email || 'Sin correo'} · {customer.phone}
+      </span>
+    </DeleteDialog>
   )
 }
-
 export function CustomerModal({
   customer,
   onClose,

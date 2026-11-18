@@ -3,17 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowUpRight, Eye, Hand, Paintbrush, Scissors, Sparkles } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import type { Service } from '@/lib/beautybook-data'
+import { getServiceIcon } from '@/lib/service-icons'
 import { formatCOP } from '@/lib/utils'
-
-const serviceIcons = {
-  corte: Scissors,
-  manicura: Hand,
-  pestanas: Eye,
-  cejas: Sparkles,
-  maquillaje: Paintbrush,
-} as const
 
 function getVisibleCount() {
   if (typeof window === 'undefined') return 3
@@ -99,7 +92,7 @@ export function ServicesCarousel({ services }: { services: Service[] }) {
       >
         <div className="services-track">
           {services.map((service, index) => {
-            const Icon = serviceIcons[service.id as keyof typeof serviceIcons] ?? Sparkles
+            const Icon = getServiceIcon(service.id)
             return (
               <Link href="/servicios" key={service.id} className={`service-card service-tone-${(index % 4) + 1}`}>
                 <div className="service-photo">

@@ -9,7 +9,6 @@ import {
   Camera,
   Check,
   CheckCheck,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -23,9 +22,8 @@ import {
   UserRound,
 } from 'lucide-react'
 import { demoAppointments, demoCustomers, type DemoAppointment } from '@/lib/dashboard-demo-data'
-import { Avatar } from '@/components/beautybook/dashboard-ui'
+import { Avatar, FilterDropdown } from '@/components/beautybook/dashboard-ui'
 import { formatCOP } from '@/lib/utils'
-import type { LucideIcon } from 'lucide-react'
 import { DashboardShell, type DashboardNavItem } from '@/components/beautybook/dashboard-shell'
 
 const PROFESSIONAL_NAME = 'Laura Martín'
@@ -357,78 +355,6 @@ function ProfessionalHome({
           </section>
         </aside>
       </div>
-    </div>
-  )
-}
-
-function FilterDropdown({
-  icon: Icon,
-  value,
-  options,
-  onChange,
-  label,
-}: {
-  icon: LucideIcon
-  value: string
-  options: string[]
-  onChange: (value: string) => void
-  label: string
-}) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    function onPointerDown(event: PointerEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false)
-    }
-    function onKeyDown(event: globalThis.KeyboardEvent) {
-      if (event.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('keydown', onKeyDown)
-    }
-  }, [open])
-
-  return (
-    <div className="bb-dropdown" ref={ref}>
-      <button
-        type="button"
-        className="bb-dropdown-btn"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-label={label}
-        onClick={() => setOpen((current) => !current)}
-      >
-        <Icon aria-hidden="true" />
-        <span>{value}</span>
-        <ChevronDown aria-hidden="true" className={open ? 'is-open' : ''} />
-      </button>
-      {open && (
-        <ul className="bb-dropdown-list" role="listbox" aria-label={label}>
-          {options.map((option) => {
-            const selected = option === value
-            return (
-              <li key={option} role="option" aria-selected={selected}>
-                <button
-                  type="button"
-                  className={selected ? 'is-selected' : ''}
-                  onClick={() => {
-                    onChange(option)
-                    setOpen(false)
-                  }}
-                >
-                  <span>{option}</span>
-                  {selected && <Check aria-hidden="true" />}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      )}
     </div>
   )
 }

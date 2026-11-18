@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, Check, ChevronDown } from 'lucide-react'
 
 export function MetricCard({ label, value, note, icon: Icon, trend, tone = 'clay' }: { label: string; value: string; note: string; icon: LucideIcon; trend?: string; tone?: 'clay' | 'sage' | 'sand' | 'plum' }) {
   return <article className="bb-metric-card"><div className={`bb-metric-icon bb-tone-${tone}`}><Icon aria-hidden="true" /></div><span className="bb-metric-label">{label}</span><strong className="bb-metric-value">{value}</strong><div className="bb-metric-foot"><span>{note}</span>{trend && <span className="bb-trend"><ArrowUpRight aria-hidden="true" />{trend}</span>}</div></article>
@@ -63,4 +63,76 @@ export function Modal({ title, description, onClose, children }: { title: string
 
 export function AppointmentStatusDot({ status }: { status: string }) {
   return <span className={`bb-calendar-status ${statusClass[status] ?? ''}`}><i aria-hidden="true" />{status}</span>
+}
+
+export function FilterDropdown({
+  icon: Icon,
+  value,
+  options,
+  onChange,
+  label,
+}: {
+  icon: LucideIcon
+  value: string
+  options: string[]
+  onChange: (value: string) => void
+  label: string
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onPointerDown(event: PointerEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false)
+    }
+    function onKeyDown(event: globalThis.KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open])
+
+  return (
+    <div className="bb-dropdown" ref={ref}>
+      <button
+        type="button"
+        className="bb-dropdown-btn"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={label}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <Icon aria-hidden="true" />
+        <span>{value}</span>
+        <ChevronDown aria-hidden="true" className={open ? 'is-open' : ''} />
+      </button>
+      {open && (
+        <ul className="bb-dropdown-list" role="listbox" aria-label={label}>
+          {options.map((option) => {
+            const selected = option === value
+            return (
+              <li key={option} role="option" aria-selected={selected}>
+                <button
+                  type="button"
+                  className={selected ? 'is-selected' : ''}
+                  onClick={() => {
+                    onChange(option)
+                    setOpen(false)
+                  }}
+                >
+                  <span>{option}</span>
+                  {selected && <Check aria-hidden="true" />}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
 }

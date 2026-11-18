@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, ArrowRight, Asterisk, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, Eye, Hand, MapPin, Paintbrush, Scissors, Sparkles, User, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Asterisk, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, MapPin, User, X } from 'lucide-react'
 import { professionals, serviceProfessionals, services } from '@/lib/beautybook-data'
+import { getServiceIcon } from '@/lib/service-icons'
 import { formatCOP } from '@/lib/utils'
 
 const steps = ['Servicio', 'Profesional', 'Fecha y hora', 'Tus datos', 'Confirmación']
@@ -52,14 +53,6 @@ const isPastTimeSlot = (date: Date | null, value: string, now: Date | null) => {
   if (!date || !now || !isSameDay(date, now)) return false
   return timeInMinutes(value) < now.getHours() * 60 + now.getMinutes()
 }
-
-const serviceIcons = {
-  corte: Scissors,
-  manicura: Hand,
-  pestanas: Eye,
-  cejas: Sparkles,
-  maquillaje: Paintbrush,
-} as const
 
 // Texto de ejemplo de la política de privacidad (sin backend).
 const privacyUpdated = '16 de noviembre de 2026'
@@ -241,7 +234,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
           <p className="booking-lead">Elige el ritual que mejor va contigo.</p>
           <div className="choice-list" role="radiogroup" aria-label="Servicios disponibles">
             {services.map((item) => {
-              const Icon = serviceIcons[item.id as keyof typeof serviceIcons] ?? Sparkles
+              const Icon = getServiceIcon(item.id)
               const isSelected = serviceId === item.id
               return (
                 <label key={item.id} className={`choice-row ${isSelected ? 'selected' : ''}`}>

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent 
 import Image from 'next/image'
 import { ArrowUpDown, Banknote, CalendarDays, Check, ChevronDown, CircleCheck, Clock3, Eye, Globe, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Phone, Plus, Search, Settings2, Sparkles, Ticket, Trash2, Upload, User, Users, type LucideIcon } from 'lucide-react'
 import { demoAppointments, demoCustomers, demoProfessionals, demoServices, type DemoAppointment, type AppointmentStatus } from '@/lib/dashboard-demo-data'
-import { Modal, StatusBadge } from '@/components/beautybook/dashboard-ui'
+import { FilterDropdown, Modal, StatusBadge } from '@/components/beautybook/dashboard-ui'
 import { formatCOP } from '@/lib/utils'
 import { DashboardShell, type DashboardNavItem } from '@/components/beautybook/dashboard-shell'
 import { serviceProfessionals } from '@/lib/beautybook-data'
@@ -348,30 +348,6 @@ function CreateAppointmentModal({ onClose, onSave, initial, title = 'Agendar cit
   }
 
   return <div className="bb-book-modal"><Modal title={title} description={eyebrow} onClose={onClose}><form className="bb-form bb-book-form" onSubmit={submit} noValidate><div className="bb-book-grid"><div className="bb-book-col"><div className="bb-field"><div className="bb-field-head"><span>Cliente</span><button type="button" className="bb-field-link" onClick={() => { setName(''); setEmail(''); setPhone('') }}>+ Nuevo cliente</button></div><input value={name} onChange={(event) => setName(event.target.value)} placeholder="Nombre del cliente" autoComplete="off" /></div><div className="bb-field"><div className="bb-field-head"><span>Servicio</span></div><FilterDropdown icon={Sparkles} value={serviceValue} options={demoServices.map((item) => `${item.name} · ${formatCOP(item.price)}`)} onChange={selectService} label="Servicio" /></div><div className="bb-field"><div className="bb-field-head"><span>Profesional</span></div><FilterDropdown icon={User} value={professional || 'Seleccionar especialista'} options={demoProfessionals.map((person) => person.name)} onChange={setProfessional} label="Especialista" /></div></div><div className="bb-book-col"><div className="bb-field"><div className="bb-field-head"><span>Fecha de la reserva</span></div><FilterDropdown icon={CalendarDays} value={dateValue} options={days.map((day) => day.label)} onChange={(display) => setDateISO(days.find((day) => day.label === display)?.iso ?? '')} label="Fecha de la reserva" /></div><div className="bb-field"><div className="bb-field-head"><span>Horarios disponibles</span></div><div className="bb-time-chips" role="group" aria-label="Horarios disponibles">{timeOptions.map((slot) => <button key={slot} type="button" className={time === slot ? 'is-selected' : ''} aria-pressed={time === slot} onClick={() => setTime(slot)}>{slot}</button>)}</div></div></div></div><div className="bb-form-row"><label>Correo electrónico *<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="hola@ejemplo.com" autoComplete="off" /></label><label>Teléfono *<input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="300 123 4567" autoComplete="off" /></label></div><div className="bb-book-summary"><div><span>RESUMEN DE RESERVA</span><strong>{service ? `${service.name} · ${time || '--:--'}` : 'Selecciona un servicio'}</strong></div><div className="bb-book-total"><span>TOTAL ESTIMADO</span><strong>{service ? formatCOP(service.price) : '—'}</strong></div></div>{error && <p className="bb-form-error" role="alert">{error}</p>}<div className="bb-book-actions"><button type="button" className="bb-button bb-button-outline" onClick={onClose}>Cancelar</button><button type="submit" className="bb-button bb-button-primary"><Check aria-hidden="true" />{submitLabel}</button></div></form></Modal></div>
-}
-
-function FilterDropdown({ icon: Icon, value, options, onChange, label }: { icon: LucideIcon; value: string; options: string[]; onChange: (value: string) => void; label: string }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!open) return
-    function onPointerDown(event: PointerEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false)
-    }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('keydown', onKeyDown)
-    }
-  }, [open])
-  return <div className="bb-dropdown" ref={ref}><button type="button" className="bb-dropdown-btn" aria-haspopup="listbox" aria-expanded={open} aria-label={label} onClick={() => setOpen((current) => !current)}><Icon aria-hidden="true" /><span>{value}</span><ChevronDown aria-hidden="true" className={open ? 'is-open' : ''} /></button>{open && <ul className="bb-dropdown-list" role="listbox" aria-label={label}>{options.map((option) => {
-    const selected = option === value
-    return <li key={option} role="option" aria-selected={selected}><button type="button" className={selected ? 'is-selected' : ''} onClick={() => { onChange(option); setOpen(false) }}><span>{option}</span>{selected && <Check aria-hidden="true" />}</button></li>
-  })}</ul>}</div>
 }
 
 function DeleteAppointmentModal({ appointment, onClose, onConfirm }: { appointment: DemoAppointment; onClose: () => void; onConfirm: () => void }) {

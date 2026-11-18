@@ -1,69 +1,16 @@
-import Image from "next/image";
+import Link from 'next/link'
+import Image from 'next/image'
+import { ArrowUpRight, Star } from 'lucide-react'
+import { services, professionals, testimonials } from '@/lib/beautybook-data'
+import { SiteHeader, SiteFooter } from '@/components/beautybook/site-shell'
+import { ServicesCarousel } from '@/components/beautybook/services-carousel'
+import { TestimonialsCarousel } from '@/components/beautybook/testimonials-carousel'
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+export default function HomePage() {
+  return <><SiteHeader/><main className="home-page"><section className="hero"><Image className="hero-image" src="/beautybook-hero.png" alt="Interior luminoso de BeautyMC con una clienta en su cita de peluquería" fill priority sizes="100vw"/><div className="hero-wash"/><div className="hero-content"><span className="eyebrow">BEAUTYMC SALÓN · COLOMBIA</span><h1>Confianza,<br/><em>en cada detalle.</em></h1><p>Estética personalizada donde cada sesión está pensada para realzar lo mejor de ti.</p><Link href="/reservar" className="button button-rounded">Encuentra tu momento <ArrowUpRight size={16}/></Link><div className="hero-rating"><span className="rating-stars" aria-label="5 de 5 estrellas">{Array.from({length:5},(_,index)=><Star key={index} size={11} fill="currentColor" aria-hidden="true"/>)}</span><span>4,9/5 · Más de 320 clientes felices</span></div></div><span className="hero-note">BELLEZA CON CALMA · DESDE 2026</span></section>
+<section className="section services-section"><div className="section-heading"><div><span className="eyebrow">NUESTROS SERVICIOS</span><h2>Pequeños rituales,<br/><em>grandes momentos.</em></h2></div><Link className="text-link" href="/servicios">Ver todos los servicios <ArrowUpRight size={16}/></Link></div><ServicesCarousel services={services} /></section>
+<section id="nosotras" className="about-section"><div className="about-art"><div className="about-photo"><Image src="/beautybook-interior.png" alt="Interior luminoso del salón BeautyMC con espejos arqueados y detalles cálidos" fill sizes="(max-width: 620px) 80vw, 35vw"/></div><div className="about-stamp"><span>CUIDADO</span><span className="stamp-star">✳</span><span>REAL</span></div></div><div className="about-copy"><span className="eyebrow">UN SALÓN, OTRA FORMA DE CUIDARTE</span><h2>La belleza empieza<br/>cuando te <em>sientes bien.</em></h2><p>Creemos que cuidarte no debería ser una tarea más. Por eso creamos un lugar sin prisas, donde cada detalle —y cada persona— importa.</p><p>Nuestro equipo combina técnica, sensibilidad y productos cuidadosamente seleccionados para que salgas con algo más que un nuevo look: con ganas de volver.</p><Link className="text-link" href="/servicios">Conoce nuestra filosofía <ArrowUpRight size={16}/></Link><div className="about-proof"><strong>+8</strong><span>años cuidando<br/>de ti</span><strong>4.9<Star className="proof-star" size={12} fill="currentColor" aria-hidden="true"/></strong><span>valoración de<br/>nuestras clientas</span></div></div></section>
+<section className="section team-section"><div className="section-heading"><div><span className="eyebrow">MANOS QUE CUIDAN</span><h2>Detrás de cada ritual,<br/><em>un gran profesional.</em></h2></div></div><div className="team-grid">{professionals.map((person,i)=><article className="team-card" key={person.id}><div className={`team-portrait portrait-${i+1}`}><Image src={person.image} alt={`Retrato de muestra ficticio de ${person.name}`} fill sizes="(max-width: 620px) 45vw, (max-width: 850px) 30vw, 22vw"/></div><h3>{person.name}</h3><p>{person.specialty}</p><Link className="text-link team-book-link" href={`/reservar?profesional=${person.id}`}>Agendar con {person.name.split(' ')[0]} <ArrowUpRight size={15}/></Link></article>)}</div></section>
+<section className="testimonial-section"><span className="eyebrow">LO QUE CUENTAN</span><h2 className="testimonial-heading">Pequeños momentos,<br/><em>grandes sonrisas.</em></h2><TestimonialsCarousel testimonials={testimonials} /></section>
+<section className="cta-section"><div><span className="eyebrow">TU PRÓXIMO MOMENTO EMPIEZA AQUÍ</span><h2>¿Te guardamos<br/><em>un ratito?</em></h2><p>Elige tu servicio favorito. Nosotras nos ocupamos del resto.</p><Link className="button button-light button-rounded" href="/reservar">Reservar una cita <ArrowUpRight size={16}/></Link></div><div className="cta-flower" aria-hidden="true">✳</div></section></main><SiteFooter/></>
 }

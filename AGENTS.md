@@ -1,9 +1,25 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# BeautyMC - Instrucciones del proyecto
 
-## This is NOT the Next.js you know
+## Información general
+- BeautyMC es una aplicación desarrollada con Next.js y TypeScript.
+- Actualmente el proyecto contiene únicamente el frontend.
+- Todavía no existe un backend ni una base de datos implementados.
+- Se utiliza pnpm como gestor de paquetes.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+## Uso de Codebase Memory MCP
+- Antes de explorar el código para una tarea, utilizar Codebase Memory MCP para localizar los archivos, componentes, funciones y dependencias relevantes.
+- Aprovechar el grafo de conocimiento para comprender las relaciones entre los módulos.
+- Consultar el código fuente de los archivos relevantes antes de modificarlos.
+- Evitar explorar o leer archivos y directorios que no estén relacionados con la tarea.
+- Identificar los posibles efectos de los cambios sobre otros componentes.
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+## Desarrollo
+- Respetar la arquitectura y organización existente.
+- Mantener los patrones visuales y de programación del proyecto.
+- No modificar funcionalidades ajenas a la tarea solicitada.
+- No instalar dependencias ni cambiar configuraciones sin necesidad.
+- Verificar los cambios realizados y comprobar que no afecten otras funcionalidades.
 
-<!-- END:nextjs-agent-rules -->
+## Evolución del proyecto
+- Mantener estas instrucciones actualizadas cuando cambien las tecnologías, la arquitectura o las funcionalidades.
+- Cuando se implemente el backend y la base de datos, actualizar la documentación para reflejar la arquitectura real.

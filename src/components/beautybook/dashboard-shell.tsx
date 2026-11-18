@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, LogOut, Menu, X, type LucideIcon } from 'lucide-react'
+import { DialogBackdrop } from '@/components/beautybook/dashboard-ui'
 
 export type DashboardNavItem = { id: string; label: string; icon: LucideIcon }
 
@@ -79,7 +80,7 @@ export function DashboardShell({ mode, navItems, activeId, onNavigate, eyebrow, 
         </div>
         <button className="bb-mobile-close" aria-label="Cerrar menú" onClick={() => setMobileOpen(false)}><X /></button>
       </aside>
-      {logoutOpen && <div className="bb-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setLogoutOpen(false) }}><section className="bb-delete-card" role="alertdialog" aria-modal="true" aria-labelledby="bb-logout-title" aria-describedby="bb-logout-description"><button type="button" className="bb-detail-close" onClick={() => setLogoutOpen(false)} aria-label="Cerrar">×</button><span className="bb-delete-icon" aria-hidden="true"><LogOut /></span><h2 id="bb-logout-title">¿Cerrar sesión?</h2><p id="bb-logout-description">Tendrás que iniciar sesión de nuevo para volver al panel.</p><div className="bb-delete-actions"><button type="button" className="bb-delete-cancel" onClick={() => setLogoutOpen(false)}>Cancelar</button><button type="button" className="bb-delete-confirm" onClick={() => router.push('/')}><LogOut aria-hidden="true" />Sí, cerrar sesión</button></div></section></div>}
+      {logoutOpen && <DialogBackdrop onClose={() => setLogoutOpen(false)}><section className="bb-delete-card" role="alertdialog" aria-modal="true" aria-labelledby="bb-logout-title" aria-describedby="bb-logout-description"><button type="button" className="bb-detail-close" onClick={() => setLogoutOpen(false)} aria-label="Cerrar">×</button><span className="bb-delete-icon" aria-hidden="true"><LogOut /></span><h2 id="bb-logout-title">¿Cerrar sesión?</h2><p id="bb-logout-description">Tendrás que iniciar sesión de nuevo para volver al panel.</p><div className="bb-delete-actions"><button type="button" className="bb-delete-cancel" onClick={() => setLogoutOpen(false)}>Cancelar</button><button type="button" className="bb-delete-confirm" onClick={() => router.push('/')}><LogOut aria-hidden="true" />Sí, cerrar sesión</button></div></section></DialogBackdrop>}
       <main className="bb-main">
         <header className="bb-topbar">
           <button className="bb-mobile-menu" aria-label="Abrir menú" onClick={() => setMobileOpen(true)}><Menu /></button><button className="bb-desktop-toggle" aria-label={collapsed ? 'Expandir menú' : 'Contraer menú'} aria-pressed={collapsed} onClick={() => setCollapsed((value) => !value)}><Menu /></button>

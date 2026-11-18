@@ -1,13 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import {
-  CalendarDays,
-  Check,
-  LayoutDashboard,
-  List,
-  UserRound,
-} from 'lucide-react'
+import { CalendarDays, Check, LayoutDashboard, List, UserRound } from 'lucide-react'
 import { demoAppointments, type DemoAppointment } from '@/lib/dashboard-demo-data'
 import { DashboardShell, type DashboardNavItem } from '@/components/beautybook/dashboard-shell'
 import { ProfessionalAppointmentModal } from '@/components/beautybook/professional/appointment-modal'
@@ -48,26 +42,15 @@ export default function ProfessionalDashboard() {
   }
 
   return (
-    <DashboardShell
-      mode="professional"
-      navItems={navItems}
-      activeId={view}
-      onNavigate={setView}
-      title={title}
-    >
+    <DashboardShell mode="professional" navItems={navItems} activeId={view} onNavigate={setView} title={title}>
       {view === 'inicio' && (
         <ProfessionalHome appointments={myAppointments} onOpen={setSelectedAppointment} onNavigate={setView} />
       )}
-      {view === 'mis-citas' && (
-        <MyAppointments appointments={myAppointments} onOpen={setSelectedAppointment} />
-      )}
+      {view === 'mis-citas' && <MyAppointments appointments={myAppointments} onOpen={setSelectedAppointment} />}
       {view === 'calendario' && <MyCalendar appointments={myAppointments} onOpen={setSelectedAppointment} />}
       {view === 'perfil' && <MyProfile notify={notify} />}
       {selectedAppointment && (
-        <ProfessionalAppointmentModal
-          appointment={selectedAppointment}
-          onClose={() => setSelectedAppointment(null)}
-        />
+        <ProfessionalAppointmentModal appointment={selectedAppointment} onClose={() => setSelectedAppointment(null)} />
       )}
       {toast && (
         <div className="bb-toast" role="status">

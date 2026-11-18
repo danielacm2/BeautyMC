@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import {
   CalendarDays,
   Check,
@@ -16,7 +16,7 @@ import {
   User,
 } from 'lucide-react'
 import { demoProfessionals, demoServices, type DemoAppointment } from '@/lib/dashboard-demo-data'
-import { DeleteDialog, FilterDropdown, Modal } from '@/components/beautybook/dashboard-ui'
+import { DeleteDialog, DialogBackdrop, FilterDropdown, Modal, useEscapeKey } from '@/components/beautybook/dashboard-ui'
 import { formatCOP } from '@/lib/utils'
 import { isValidEmail } from '@/lib/validation'
 import { formatAgendaDate, initialsOf, type AppointmentDraft } from '@/components/beautybook/admin/admin-shared'
@@ -587,23 +587,11 @@ export function AppointmentModal({
   onClose: () => void
   notify: (message: string) => void
 }) {
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  useEscapeKey(onClose)
   const whatsappDigits = appointment.phone.replace(/\D/g, '')
   const whatsappUrl = `https://wa.me/${whatsappDigits}?text=${encodeURIComponent(`Hola ${appointment.customer}, te recordamos tu cita en BeautyMC: ${appointment.service} el ${appointment.date} a las ${appointment.time}. ¡Te esperamos!`)}`
   return (
-    <div
-      className="bb-modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
+    <DialogBackdrop onClose={onClose}>
       <section className="bb-detail-card" role="dialog" aria-modal="true" aria-labelledby="bb-detail-title">
         <div className="bb-detail-head">
           <button type="button" className="bb-detail-close" onClick={onClose} aria-label="Cerrar detalle">
@@ -682,6 +670,6 @@ export function AppointmentModal({
           )}
         </div>
       </section>
-    </div>
+    </DialogBackdrop>
   )
 }

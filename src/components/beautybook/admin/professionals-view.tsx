@@ -16,7 +16,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { demoProfessionals, demoServices, type DemoAppointment } from '@/lib/dashboard-demo-data'
-import { DeleteDialog, Modal, StatusBadge } from '@/components/beautybook/dashboard-ui'
+import { DeleteDialog, DialogBackdrop, Modal, StatusBadge, useEscapeKey } from '@/components/beautybook/dashboard-ui'
 import { isValidEmail } from '@/lib/validation'
 import { serviceProfessionals } from '@/lib/beautybook-data'
 import { TimePicker, parseDisplayTime } from '@/components/beautybook/admin/time-picker'
@@ -33,24 +33,12 @@ function ProfessionalDetailModal({
   appointments: DemoAppointment[]
   onClose: () => void
 }) {
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  useEscapeKey(onClose)
   const todayAppointments = appointments.filter(
     (appointment) => appointment.professional === professional.name && appointment.date.startsWith('Hoy'),
   )
   return (
-    <div
-      className="bb-modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
+    <DialogBackdrop onClose={onClose}>
       <section className="bb-service-card" role="dialog" aria-modal="true" aria-labelledby="bb-pro-title">
         <div className="bb-detail-head">
           <button type="button" className="bb-detail-close" onClick={onClose} aria-label="Cerrar">
@@ -139,7 +127,7 @@ function ProfessionalDetailModal({
           </button>
         </div>
       </section>
-    </div>
+    </DialogBackdrop>
   )
 }
 

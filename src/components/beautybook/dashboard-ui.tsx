@@ -61,6 +61,30 @@ export function Modal({ title, description, onClose, children }: { title: string
   return <div className="bb-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}><section ref={modalRef} className="bb-modal" role="dialog" aria-modal="true" aria-labelledby="bb-modal-title" onKeyDown={handleKeyDown}><button className="bb-modal-close" onClick={onClose} aria-label="Cerrar">×</button><span className="bb-eyebrow">BEAUTYMC</span><h2 id="bb-modal-title">{title}</h2>{description && <p className="bb-modal-description">{description}</p>}{children}</section></div>
 }
 
+export function useEscapeKey(onClose: () => void) {
+  useEffect(() => {
+    function handleKeyDown(event: globalThis.KeyboardEvent) {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+}
+
+export function DialogBackdrop({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div
+      className="bb-modal-backdrop"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
 export function DeleteDialog({
   titleId,
   descriptionId,
@@ -82,21 +106,9 @@ export function DeleteDialog({
   onConfirm: () => void
   children: React.ReactNode
 }) {
-  useEffect(() => {
-    function handleKeyDown(event: globalThis.KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  useEscapeKey(onClose)
   return (
-    <div
-      className="bb-modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
+    <DialogBackdrop onClose={onClose}>
       <section
         className="bb-delete-card"
         role="alertdialog"
@@ -123,7 +135,7 @@ export function DeleteDialog({
           </button>
         </div>
       </section>
-    </div>
+    </DialogBackdrop>
   )
 }
 

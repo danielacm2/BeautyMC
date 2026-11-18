@@ -1,29 +1,17 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import Image from 'next/image'
 import { Check, Eye, ImagePlus, Pencil, Plus, Search, Sparkles, Trash2 } from 'lucide-react'
 import { demoServices } from '@/lib/dashboard-demo-data'
-import { DeleteDialog, FilterDropdown, Modal } from '@/components/beautybook/dashboard-ui'
+import { DeleteDialog, DialogBackdrop, FilterDropdown, Modal, useEscapeKey } from '@/components/beautybook/dashboard-ui'
 import { formatCOP } from '@/lib/utils'
 import { categoryLabel, type ServiceDraft, type ServiceItem } from '@/components/beautybook/admin/admin-shared'
 
 function ServiceDetailModal({ service, onClose }: { service: ServiceItem; onClose: () => void }) {
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  useEscapeKey(onClose)
   return (
-    <div
-      className="bb-modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
+    <DialogBackdrop onClose={onClose}>
       <section className="bb-service-card" role="dialog" aria-modal="true" aria-labelledby="bb-service-title">
         <div className="bb-service-cover">
           <Image src={service.image} alt={`Imagen de ${service.name}`} fill sizes="(max-width: 560px) 100vw, 480px" />
@@ -55,7 +43,7 @@ function ServiceDetailModal({ service, onClose }: { service: ServiceItem; onClos
           </button>
         </div>
       </section>
-    </div>
+    </DialogBackdrop>
   )
 }
 

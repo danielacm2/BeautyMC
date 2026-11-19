@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import './dashboards.css'
+import '../dashboard-base.css'
 
 export const metadata: Metadata = {
   title: 'Administración | BeautyMC',

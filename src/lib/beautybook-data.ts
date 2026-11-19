@@ -1,12 +1,13 @@
 export interface Service { id: string; name: string; category: string; description: string; price: number; image: string }
-export interface Professional { id: string; name: string; specialty: string; initials: string; image: string; categories?: string[]; email?: string; password?: string; phone?: string; bio?: string }
+/** Datos públicos de una profesional. Los datos administrativos (contacto, credenciales, horario) viven en AdminProfessional. */
+export interface Professional { id: string; name: string; specialty: string; initials: string; image: string }
 export const services: Service[] = [
-  { id: 'corte', name: 'Corte', category: 'CORTES', description: 'Un corte pensado para ti, con lavado relajante y acabado.', price: 200000, image: '/beauty-service-hair.png' },
-  { id: 'peinado', name: 'Peinado & ondas', category: 'PEINADOS', description: 'Brushing, ondas suaves o recogido elegante con acabado de larga duración.', price: 115000, image: '/beauty-service-hair.png' },
-  { id: 'manicura', name: 'Manicura esencial', category: 'UÑAS', description: 'Cuidado completo de uñas, hidratación y esmaltado impecable.', price: 145000, image: '/beauty-service-nails.png' },
-  { id: 'pestanas', name: 'Lifting & mirada', category: 'PESTAÑAS', description: 'Diseño y lifting para realzar tu mirada de forma natural.', price: 170000, image: '/beauty-service-lashes.png' },
-  { id: 'cejas', name: 'Diseño de cejas', category: 'CEJAS', description: 'Diseño personalizado, depilación y definición de la forma.', price: 110000, image: '/beauty-service-brows.png' },
-  { id: 'maquillaje', name: 'Maquillaje especial', category: 'MAQUILLAJE', description: 'Un look a medida para celebrar tus momentos especiales.', price: 260000, image: '/beauty-service-makeup.png' },
+  { id: 'corte', name: 'Corte', category: 'CORTES', description: 'Un corte pensado para ti, con lavado relajante y acabado.', price: 200000, image: '/beauty-service-hair.jpg' },
+  { id: 'peinado', name: 'Peinado & ondas', category: 'PEINADOS', description: 'Brushing, ondas suaves o recogido elegante con acabado de larga duración.', price: 115000, image: '/beauty-service-hair.jpg' },
+  { id: 'manicura', name: 'Manicura esencial', category: 'UÑAS', description: 'Cuidado completo de uñas, hidratación y esmaltado impecable.', price: 145000, image: '/beauty-service-nails.jpg' },
+  { id: 'pestanas', name: 'Lifting & mirada', category: 'PESTAÑAS', description: 'Diseño y lifting para realzar tu mirada de forma natural.', price: 170000, image: '/beauty-service-lashes.jpg' },
+  { id: 'cejas', name: 'Diseño de cejas', category: 'CEJAS', description: 'Diseño personalizado, depilación y definición de la forma.', price: 110000, image: '/beauty-service-brows.jpg' },
+  { id: 'maquillaje', name: 'Maquillaje especial', category: 'MAQUILLAJE', description: 'Un look a medida para celebrar tus momentos especiales.', price: 260000, image: '/beauty-service-makeup.jpg' },
 ]
 export const professionals: Professional[] = [
   { id: 'laura', name: 'Laura Martín', specialty: 'Peluquería & color', initials: 'LM', image: '/professional-laura.jpg' },

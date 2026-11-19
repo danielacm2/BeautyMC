@@ -16,9 +16,14 @@ import {
   User,
 } from 'lucide-react'
 import { demoProfessionals, demoServices, type DemoAppointment } from '@/lib/dashboard-demo-data'
-import { DeleteDialog, DialogBackdrop, FilterDropdown, Modal, useEscapeKey } from '@/components/beautybook/dashboard-ui'
+import {
+  DeleteDialog,
+  DialogBackdrop,
+  FilterDropdown,
+  Modal,
+} from '@/components/beautybook/dashboard-ui'
 import { formatCOP } from '@/lib/utils'
-import { isValidEmail } from '@/lib/validation'
+import { isValidColombianPhone, isValidEmail } from '@/lib/validation'
 import { formatAgendaDate, initialsOf, type AppointmentDraft } from '@/components/beautybook/admin/admin-shared'
 
 const agendaDayOptions = ['Todas las fechas', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -90,13 +95,21 @@ export function CreateAppointmentModal({
         : agendaTimeSlots,
     [initial],
   )
-  const service = demoServices.find((item) => item.id === serviceId)
+  const legacyService = initial?.legacyService
+  const catalogService = demoServices.find((item) => item.id === serviceId)
+  // Una cita puede conservar un servicio que ya no está en el catálogo mientras no se elija otro.
+  const service = catalogService ?? (serviceId === '' ? legacyService : undefined)
   const serviceValue = service ? `${service.name} · ${formatCOP(service.price)}` : 'Seleccionar servicio'
+  const serviceOptions = [
+    ...(legacyService ? [`${legacyService.name} · ${formatCOP(legacyService.price)}`] : []),
+    ...demoServices.map((item) => `${item.name} · ${formatCOP(item.price)}`),
+  ]
   const dateValue = days.find((day) => day.iso === dateISO)?.label ?? initial?.dateLabel ?? 'Seleccionar fecha'
 
   function selectService(display: string) {
     const found = demoServices.find((item) => `${item.name} · ${formatCOP(item.price)}` === display)
     if (found) setServiceId(found.id)
+    else if (legacyService) setServiceId('')
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -108,6 +121,10 @@ export function CreateAppointmentModal({
     }
     if (!name.trim() || !isValidEmail(email.trim()) || !phone.trim()) {
       setError('Completa el nombre, un email válido y el teléfono del cliente.')
+      return
+    }
+    if (!isValidColombianPhone(phone)) {
+      setError('Escribe un teléfono colombiano válido, por ejemplo 300 123 4567.')
       return
     }
     setError('')
@@ -159,7 +176,7 @@ export function CreateAppointmentModal({
                 <FilterDropdown
                   icon={Sparkles}
                   value={serviceValue}
-                  options={demoServices.map((item) => `${item.name} · ${formatCOP(item.price)}`)}
+                  options={serviceOptions}
                   onChange={selectService}
                   label="Servicio"
                 />
@@ -587,7 +604,6 @@ export function AppointmentModal({
   onClose: () => void
   notify: (message: string) => void
 }) {
-  useEscapeKey(onClose)
   const whatsappDigits = appointment.phone.replace(/\D/g, '')
   const whatsappUrl = `https://wa.me/${whatsappDigits}?text=${encodeURIComponent(`Hola ${appointment.customer}, te recordamos tu cita en BeautyMC: ${appointment.service} el ${appointment.date} a las ${appointment.time}. ¡Te esperamos!`)}`
   return (

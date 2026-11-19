@@ -2,7 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { CalendarDays, Check, Clock3, Settings2, Sparkles, Users } from 'lucide-react'
-import { demoAppointments, demoProfessionals, demoServices, type DemoAppointment } from '@/lib/dashboard-demo-data'
+import {
+  DEMO_ADMIN,
+  DEMO_TODAY_LABEL,
+  demoAppointments,
+  demoProfessionals,
+  demoServices,
+  type DemoAppointment,
+} from '@/lib/dashboard-demo-data'
 import { DashboardShell, type DashboardNavItem } from '@/components/beautybook/dashboard-shell'
 import { SettingsView } from '@/components/beautybook/admin/settings-view'
 import { CustomerModal, CustomersView } from '@/components/beautybook/admin/customers-view'
@@ -100,8 +107,10 @@ export default function AdminDashboard() {
   }
 
   function toDraft(appointment: DemoAppointment): AppointmentDraft {
+    const catalogService = demoServices.find((item) => item.name === appointment.service)
     return {
-      serviceId: demoServices.find((item) => item.name === appointment.service)?.id ?? '',
+      serviceId: catalogService?.id ?? '',
+      legacyService: catalogService ? undefined : { name: appointment.service, price: appointment.price },
       professional: appointment.professional,
       dateISO: '',
       dateLabel: appointment.date,
@@ -142,6 +151,9 @@ export default function AdminDashboard() {
           : 'PANEL DE ADMINISTRACIÓN'
       }
       title={title}
+      userName={DEMO_ADMIN.name}
+      userInitials={DEMO_ADMIN.initials}
+      dateLabel={DEMO_TODAY_LABEL}
     >
       {view === 'inicio' && (
         <AdminHome

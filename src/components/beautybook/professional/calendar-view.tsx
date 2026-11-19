@@ -3,16 +3,14 @@
 import { Fragment, useState } from 'react'
 import { ChevronLeft, ChevronRight, Coffee } from 'lucide-react'
 import type { DemoAppointment } from '@/lib/dashboard-demo-data'
-
-const weekDays = [
-  { day: 'Lun', date: '9' },
-  { day: 'Mar', date: '10' },
-  { day: 'Mié', date: '11' },
-  { day: 'Jue', date: '12' },
-  { day: 'Vie', date: '13' },
-  { day: 'Sáb', date: '14' },
-  { day: 'Dom', date: '15' },
-]
+import {
+  TODAY_INDEX as todayIndex,
+  WEEK_DAYS as weekDays,
+  WORK_END as workEnd,
+  WORK_START as workStart,
+  appointmentsInWeek,
+  dayIndexInWeek,
+} from '@/components/beautybook/professional/professional-shared'
 
 export function MyCalendar({
   appointments,
@@ -25,40 +23,14 @@ export function MyCalendar({
   const [showMonSun, setShowMonSun] = useState(false)
   const [calView, setCalView] = useState<'semana' | 'hoy'>('semana')
   const hours = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00']
-  // Día "Hoy" en los datos de muestra: Sáb 14
-  const todayIndex = 5
-  const workStart: Record<number, number> = { 0: 9, 1: 9, 2: 9, 3: 9, 4: 9, 5: 10, 6: -1 }
-  const workEnd: Record<number, number> = { 0: 17, 1: 17, 2: 17, 3: 17, 4: 17, 5: 15, 6: -1 }
-
-  function dayIndexOf(date: string): number {
-    const dayNumber = date.match(/(\d{1,2})\s*[A-Za-zñÑ]+/)
-    if (dayNumber) {
-      const found = weekDays.findIndex((day) => day.date === dayNumber[1])
-      if (found >= 0) return found
-    }
-    const names: Record<string, number> = {
-      lun: 0,
-      mar: 1,
-      mié: 2,
-      mie: 2,
-      jue: 3,
-      vie: 4,
-      sáb: 5,
-      sab: 5,
-      dom: 6,
-      hoy: todayIndex,
-    }
-    return names[date.split(',')[0]?.trim().toLowerCase()] ?? todayIndex
-  }
-
   function hourOf(time: string): number {
     return parseInt(time.split(':')[0] ?? '9', 10)
   }
 
   const byDayHour = new Map<string, DemoAppointment>()
-  for (const appointment of appointments) {
-    if (appointment.status === 'Cancelada') continue
-    byDayHour.set(`${dayIndexOf(appointment.date)}-${hourOf(appointment.time)}`, appointment)
+  const weekAppointments = appointmentsInWeek(appointments)
+  for (const appointment of weekAppointments) {
+    byDayHour.set(`${dayIndexInWeek(appointment.date)}-${hourOf(appointment.time)}`, appointment)
   }
 
   const allDays = weekDays.map((_, index) => index)
@@ -125,12 +97,12 @@ export function MyCalendar({
           <div className="bb-citas-capsule">
             <div className="bb-citas-metric">
               <span>TURNO HOY</span>
-              <strong>10:00 — 15:00</strong>
+              <strong>{String(workStart[todayIndex]).padStart(2, '0')}:00 — {String(workEnd[todayIndex]).padStart(2, '0')}:00</strong>
             </div>
             <div className="bb-citas-capsule-div" aria-hidden="true" />
             <div className="bb-citas-metric">
               <span>CITAS SEMANA</span>
-              <strong>10</strong>
+              <strong>{weekAppointments.length}</strong>
             </div>
           </div>
           <div className="bb-cal-nav" role="group" aria-label="Navegar semanas">

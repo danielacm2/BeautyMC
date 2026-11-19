@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import '../dashboard-base.css'
 import './profesional.css'
 
 export const metadata: Metadata = {

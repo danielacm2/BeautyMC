@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import Image from 'next/image'
 import {
   CalendarDays,
@@ -16,8 +16,9 @@ import {
   Trash2,
 } from 'lucide-react'
 import { demoProfessionals, demoServices, type DemoAppointment } from '@/lib/dashboard-demo-data'
-import { DeleteDialog, DialogBackdrop, Modal, StatusBadge, useEscapeKey } from '@/components/beautybook/dashboard-ui'
-import { isValidEmail } from '@/lib/validation'
+import { DeleteDialog, DialogBackdrop, Modal, StatusBadge, useDismissable } from '@/components/beautybook/dashboard-ui'
+import { readImageFile } from '@/lib/image-upload'
+import { isValidColombianPhone, isValidEmail } from '@/lib/validation'
 import { serviceProfessionals } from '@/lib/beautybook-data'
 import { TimePicker, parseDisplayTime } from '@/components/beautybook/admin/time-picker'
 import { categoryLabel, type ProfessionalForm, type ProfessionalItem } from '@/components/beautybook/admin/admin-shared'
@@ -33,7 +34,6 @@ function ProfessionalDetailModal({
   appointments: DemoAppointment[]
   onClose: () => void
 }) {
-  useEscapeKey(onClose)
   const todayAppointments = appointments.filter(
     (appointment) => appointment.professional === professional.name && appointment.date.startsWith('Hoy'),
   )
@@ -191,22 +191,23 @@ function EditProfessionalModal({
   function pickImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) {
-      setError('El archivo debe ser una imagen.')
-      return
-    }
-    const reader = new FileReader()
-    reader.onload = () => {
-      setImageData(String(reader.result ?? ''))
-      setError('')
-    }
-    reader.readAsDataURL(file)
+    readImageFile(file, {
+      onError: setError,
+      onLoad: (dataUrl) => {
+        setImageData(dataUrl)
+        setError('')
+      },
+    })
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!name.trim() || !phone.trim()) {
       setError('Completa el nombre y el número de contacto.')
+      return
+    }
+    if (!isValidColombianPhone(phone)) {
+      setError('Escribe un teléfono colombiano válido, por ejemplo 300 123 4567.')
       return
     }
     if (!isValidEmail(email.trim()) || !password) {
@@ -243,7 +244,7 @@ function EditProfessionalModal({
       bio: bio.trim(),
       schedule: `${daysShort} · ${schedStart}–${schedEnd}`,
       categories: enabledCategories,
-      image: preview || '/beauty-service-hair.png',
+      image: preview || '/beauty-service-hair.jpg',
       specialty: labels.slice(0, 2).join(' & ') || 'General',
     })
   }
@@ -477,21 +478,7 @@ function MultiDayPicker({
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!open) return
-    function onPointerDown(event: PointerEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false)
-    }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('keydown', onKeyDown)
-    }
-  }, [open])
+  useDismissable(open, ref, () => setOpen(false))
 
   function toggle(value: string) {
     onChange(selected.includes(value) ? selected.filter((day) => day !== value) : [...selected, value])
@@ -561,22 +548,23 @@ function AddProfessionalModal({ onClose, onSave }: { onClose: () => void; onSave
   function pickImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) {
-      setError('El archivo debe ser una imagen.')
-      return
-    }
-    const reader = new FileReader()
-    reader.onload = () => {
-      setImageData(String(reader.result ?? ''))
-      setError('')
-    }
-    reader.readAsDataURL(file)
+    readImageFile(file, {
+      onError: setError,
+      onLoad: (dataUrl) => {
+        setImageData(dataUrl)
+        setError('')
+      },
+    })
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!name.trim() || !phone.trim()) {
       setError('Completa el nombre y el número de contacto.')
+      return
+    }
+    if (!isValidColombianPhone(phone)) {
+      setError('Escribe un teléfono colombiano válido, por ejemplo 300 123 4567.')
       return
     }
     if (!isValidEmail(email.trim()) || !password) {

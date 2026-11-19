@@ -54,6 +54,7 @@ export function ServicesCatalog({ services }: { services: Service[] }) {
                   alt={`Servicio de ${service.category.toLowerCase()}: ${service.name}`}
                   fill
                   sizes="(max-width: 700px) 100vw, 240px"
+                  loading={index < 3 ? 'eager' : undefined}
                 />
                 <span className="catalog-index">0{index + 1}</span>
               </div>

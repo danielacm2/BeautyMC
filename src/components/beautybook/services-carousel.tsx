@@ -90,7 +90,7 @@ export function ServicesCarousel({ services }: { services: Service[] }) {
             return (
               <Link href="/servicios" key={service.id} className={`service-card service-tone-${(index % 4) + 1}`}>
                 <div className="service-photo">
-                  <Image src={service.image} alt={`Servicio de ${service.category.toLowerCase()}`} fill sizes="(max-width: 620px) 85vw, (max-width: 850px) 45vw, 30vw" />
+                  <Image src={service.image} alt={`Servicio de ${service.category.toLowerCase()}`} fill sizes="(max-width: 620px) 85vw, (max-width: 850px) 45vw, 30vw" loading={index < 3 ? 'eager' : undefined} />
                 </div>
                 <div className="service-card-content">
                   <div className="service-icon"><Icon /></div>

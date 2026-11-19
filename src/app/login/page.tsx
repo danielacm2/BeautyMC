@@ -19,7 +19,7 @@ export default function LoginPage() {
             <div className="login-arch-outline" />
             <div className="login-arch">
               <Image
-                src="/beautybook-interior.png"
+                src="/beautybook-interior.jpg"
                 alt=""
                 fill
                 priority

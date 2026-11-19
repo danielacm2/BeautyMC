@@ -1,15 +1,15 @@
 import type {
+  AdminProfessional,
   AppointmentStatus,
   DemoAppointment,
   demoCustomers,
-  demoProfessionals,
   demoServices,
 } from '@/lib/dashboard-demo-data'
 import { capitalize } from '@/lib/utils'
 
 export type Customer = (typeof demoCustomers)[number]
 export type ServiceItem = (typeof demoServices)[number]
-export type ProfessionalItem = (typeof demoProfessionals)[number]
+export type ProfessionalItem = AdminProfessional
 export type AdminModal =
   | { kind: 'appointment'; appointment: DemoAppointment }
   | { kind: 'customer'; customer: Customer }
@@ -17,6 +17,8 @@ export type AdminModal =
   | null
 export type AppointmentDraft = {
   serviceId: string
+  /** Servicio actual de una cita existente que ya no está en el catálogo (se conserva si no se cambia). */
+  legacyService?: { name: string; price: number }
   professional: string
   dateISO: string
   dateLabel: string

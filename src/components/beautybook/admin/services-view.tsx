@@ -4,12 +4,17 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import Image from 'next/image'
 import { Check, Eye, ImagePlus, Pencil, Plus, Search, Sparkles, Trash2 } from 'lucide-react'
 import { demoServices } from '@/lib/dashboard-demo-data'
-import { DeleteDialog, DialogBackdrop, FilterDropdown, Modal, useEscapeKey } from '@/components/beautybook/dashboard-ui'
+import {
+  DeleteDialog,
+  DialogBackdrop,
+  FilterDropdown,
+  Modal,
+} from '@/components/beautybook/dashboard-ui'
+import { readImageFile } from '@/lib/image-upload'
 import { formatCOP } from '@/lib/utils'
 import { categoryLabel, type ServiceDraft, type ServiceItem } from '@/components/beautybook/admin/admin-shared'
 
 function ServiceDetailModal({ service, onClose }: { service: ServiceItem; onClose: () => void }) {
-  useEscapeKey(onClose)
   return (
     <DialogBackdrop onClose={onClose}>
       <section className="bb-service-card" role="dialog" aria-modal="true" aria-labelledby="bb-service-title">
@@ -120,17 +125,14 @@ export function ServiceFormModal({
   function pickImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) {
-      setError('El archivo debe ser una imagen.')
-      return
-    }
-    const reader = new FileReader()
-    reader.onload = () => {
-      setImageData(String(reader.result ?? ''))
-      setImageUrl('')
-      setError('')
-    }
-    reader.readAsDataURL(file)
+    readImageFile(file, {
+      onError: setError,
+      onLoad: (dataUrl) => {
+        setImageData(dataUrl)
+        setImageUrl('')
+        setError('')
+      },
+    })
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -151,7 +153,7 @@ export function ServiceFormModal({
       category: finalCategory,
       price: Math.round(finalPrice),
       description: description.trim(),
-      image: preview || '/beauty-service-hair.png',
+      image: preview || '/beauty-service-hair.jpg',
     })
   }
 

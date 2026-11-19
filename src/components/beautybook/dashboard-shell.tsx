@@ -3,9 +3,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { ChevronDown, LogOut, Menu, X, type LucideIcon } from 'lucide-react'
-import { DialogBackdrop } from '@/components/beautybook/dashboard-ui'
+import { DialogBackdrop, useDismissable } from '@/components/beautybook/dashboard-ui'
 
 export type DashboardNavItem = { id: string; label: string; icon: LucideIcon }
 
@@ -16,10 +16,15 @@ type DashboardShellProps = {
   onNavigate: (id: string) => void
   eyebrow?: string
   title: string
+  /** Nombre y iniciales de la persona con la sesión abierta. */
+  userName: string
+  userInitials: string
+  /** Fecha que se muestra en la barra superior, ya formateada. */
+  dateLabel: string
   children: React.ReactNode
 }
 
-export function DashboardShell({ mode, navItems, activeId, onNavigate, eyebrow, title, children }: DashboardShellProps) {
+export function DashboardShell({ mode, navItems, activeId, onNavigate, eyebrow, title, userName, userInitials, dateLabel, children }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -29,30 +34,7 @@ export function DashboardShell({ mode, navItems, activeId, onNavigate, eyebrow, 
   const roleLabel = mode === 'admin' ? 'Administración' : 'Espacio profesional'
 
 
-  useEffect(() => {
-    if (!userMenuOpen) return
-    function onPointerDown(event: PointerEvent) {
-      if (userRef.current && !userRef.current.contains(event.target as Node)) setUserMenuOpen(false)
-    }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setUserMenuOpen(false)
-    }
-    document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('keydown', onKeyDown)
-    }
-  }, [userMenuOpen])
-
-  useEffect(() => {
-    if (!logoutOpen) return
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setLogoutOpen(false)
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [logoutOpen])
+  useDismissable(userMenuOpen, userRef, () => setUserMenuOpen(false))
 
   function navigate(id: string) {
     onNavigate(id)
@@ -74,7 +56,7 @@ export function DashboardShell({ mode, navItems, activeId, onNavigate, eyebrow, 
         </nav>
         <div className="bb-sidebar-bottom">
           <div className="bb-user-menu" ref={userRef}>
-            <button className="bb-user-switch" aria-label={`${mode === 'admin' ? 'Ana Martínez' : 'Laura Martín'}, ${roleLabel}`} aria-haspopup="menu" aria-expanded={userMenuOpen} onClick={() => setUserMenuOpen((value) => !value)}><span className="bb-avatar bb-avatar-clay">{mode === 'admin' ? 'AM' : 'LM'}</span><span className="bb-user-copy"><strong>{mode === 'admin' ? 'Ana Martínez' : 'Laura Martín'}</strong><small>{roleLabel}</small></span><ChevronDown size={15} className={userMenuOpen ? 'is-open' : ''} /></button>
+            <button className="bb-user-switch" aria-label={`${userName}, ${roleLabel}`} aria-haspopup="menu" aria-expanded={userMenuOpen} onClick={() => setUserMenuOpen((value) => !value)}><span className="bb-avatar bb-avatar-clay">{userInitials}</span><span className="bb-user-copy"><strong>{userName}</strong><small>{roleLabel}</small></span><ChevronDown size={15} className={userMenuOpen ? 'is-open' : ''} /></button>
             {userMenuOpen && <div className="bb-user-popover" role="menu"><button type="button" role="menuitem" className="bb-user-logout" onClick={() => { setUserMenuOpen(false); setLogoutOpen(true); }}><LogOut aria-hidden="true" />Cerrar sesión</button></div>}
           </div>
         </div>
@@ -85,7 +67,7 @@ export function DashboardShell({ mode, navItems, activeId, onNavigate, eyebrow, 
         <header className="bb-topbar">
           <button className="bb-mobile-menu" aria-label="Abrir menú" onClick={() => setMobileOpen(true)}><Menu /></button><button className="bb-desktop-toggle" aria-label={collapsed ? 'Expandir menú' : 'Contraer menú'} aria-pressed={collapsed} onClick={() => setCollapsed((value) => !value)}><Menu /></button>
           <div className="bb-breadcrumb"><span>BeautyMC</span><span className="bb-breadcrumb-slash">/</span><strong>{title}</strong></div>
-          <div className="bb-topbar-actions"><span className="bb-date-label">Sábado, 14 de noviembre de 2026</span><span className="bb-avatar bb-avatar-clay bb-top-avatar">{mode === 'admin' ? 'AM' : 'LM'}</span></div>
+          <div className="bb-topbar-actions"><span className="bb-date-label">{dateLabel}</span><span className="bb-avatar bb-avatar-clay bb-top-avatar">{userInitials}</span></div>
         </header>
         <div className="bb-content">{eyebrow ? <div className="bb-page-intro"><div><span className="bb-eyebrow">{eyebrow}</span><h1>{title}</h1></div><div className="bb-intro-date">BeautyMC <span>·</span> Colombia</div></div> : null}{children}</div>
       </main>

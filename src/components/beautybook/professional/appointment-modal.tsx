@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { CalendarDays, Clock3, MessageCircle } from 'lucide-react'
 import { demoCustomers, type DemoAppointment } from '@/lib/dashboard-demo-data'
-import { Avatar } from '@/components/beautybook/dashboard-ui'
+import { Avatar, DialogBackdrop } from '@/components/beautybook/dashboard-ui'
 import { formatCOP } from '@/lib/utils'
 
 export function ProfessionalAppointmentModal({
@@ -13,29 +12,12 @@ export function ProfessionalAppointmentModal({
   appointment: DemoAppointment
   onClose: () => void
 }) {
-  const closeRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    closeRef.current?.focus()
-    function onKeyDown(event: globalThis.KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
-
   const customer = demoCustomers.find((item) => item.name === appointment.customer)
   const visitsSuffix = customer ? ` · ${customer.visits} visitas previas` : ''
   const whatsappHref = `https://wa.me/${appointment.phone.replace(/\D/g, '')}`
 
   return (
-    <div
-      className="bb-modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
+    <DialogBackdrop onClose={onClose}>
       <section className="bb-ficha" role="dialog" aria-modal="true" aria-labelledby="bb-ficha-title">
         <div className="bb-ficha-head">
           <div className="bb-ficha-client">
@@ -53,7 +35,7 @@ export function ProfessionalAppointmentModal({
               </p>
             </div>
           </div>
-          <button ref={closeRef} type="button" className="bb-ficha-close" onClick={onClose} aria-label="Cerrar ficha">
+          <button type="button" className="bb-ficha-close" onClick={onClose} aria-label="Cerrar ficha">
             ×
           </button>
         </div>
@@ -97,6 +79,6 @@ export function ProfessionalAppointmentModal({
           </a>
         </div>
       </section>
-    </div>
+    </DialogBackdrop>
   )
 }

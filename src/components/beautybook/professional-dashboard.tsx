@@ -2,14 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { CalendarDays, Check, LayoutDashboard, List, UserRound } from 'lucide-react'
-import { demoAppointments, type DemoAppointment } from '@/lib/dashboard-demo-data'
+import { DEMO_TODAY_LABEL, demoAppointments, type DemoAppointment } from '@/lib/dashboard-demo-data'
 import { DashboardShell, type DashboardNavItem } from '@/components/beautybook/dashboard-shell'
 import { ProfessionalAppointmentModal } from '@/components/beautybook/professional/appointment-modal'
 import { MyAppointments } from '@/components/beautybook/professional/appointments-view'
 import { ProfessionalHome } from '@/components/beautybook/professional/home-view'
 import { MyCalendar } from '@/components/beautybook/professional/calendar-view'
 import { MyProfile } from '@/components/beautybook/professional/profile-view'
-import { PROFESSIONAL_NAME } from '@/components/beautybook/professional/professional-shared'
+import { PROFESSIONAL_INITIALS, PROFESSIONAL_NAME } from '@/components/beautybook/professional/professional-shared'
 
 const navItems: DashboardNavItem[] = [
   { id: 'inicio', label: 'Inicio', icon: LayoutDashboard },
@@ -42,7 +42,16 @@ export default function ProfessionalDashboard() {
   }
 
   return (
-    <DashboardShell mode="professional" navItems={navItems} activeId={view} onNavigate={setView} title={title}>
+    <DashboardShell
+      mode="professional"
+      navItems={navItems}
+      activeId={view}
+      onNavigate={setView}
+      title={title}
+      userName={PROFESSIONAL_NAME}
+      userInitials={PROFESSIONAL_INITIALS}
+      dateLabel={DEMO_TODAY_LABEL}
+    >
       {view === 'inicio' && (
         <ProfessionalHome appointments={myAppointments} onOpen={setSelectedAppointment} onNavigate={setView} />
       )}

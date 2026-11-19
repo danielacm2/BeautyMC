@@ -1,4 +1,4 @@
-import { professionals, services } from '@/lib/beautybook-data'
+import { professionals, services, type Professional } from '@/lib/beautybook-data'
 
 export type AppointmentStatus = 'Confirmada' | 'Pendiente' | 'Completada' | 'Cancelada'
 export type DemoAppointment = {
@@ -15,6 +15,11 @@ export type DemoAppointment = {
   status: AppointmentStatus
 }
 
+/** "Hoy" de los datos de muestra (sin backend): las citas de muestra están fechadas respecto a este día. */
+export const DEMO_TODAY_LABEL = 'Sábado, 14 de noviembre de 2026'
+/** Persona administradora de muestra (sin autenticación real). */
+export const DEMO_ADMIN = { name: 'Ana Martínez', initials: 'AM' }
+
 export const demoAppointments: DemoAppointment[] = [
   { id: 'BB-1048', customer: 'Lucía Moreno', initials: 'LM', phone: '+57 312 345 8720', email: 'lucia.moreno@email.com', service: 'Corte & peinado', professional: 'Laura Martín', date: 'Hoy, 14 nov.', time: '10:00', price: 200000, status: 'Confirmada' },
   { id: 'BB-1049', customer: 'Marta Sánchez', initials: 'MS', phone: '+57 318 231 4901', email: 'marta.s@email.com', service: 'Manicura esencial', professional: 'Clara Ruiz', date: 'Hoy, 14 nov.', time: '10:30', price: 145000, status: 'Confirmada' },
@@ -27,7 +32,23 @@ export const demoAppointments: DemoAppointment[] = [
 ]
 
 export const demoServices = services.map((service) => ({ ...service, active: true }))
-export const demoProfessionals = professionals.map((person, index) => ({
+/**
+ * Profesional tal como la gestiona el panel de administración: datos públicos más campos internos.
+ * `password` solo existe en el formulario de muestra (sin autenticación real): nunca se guarda ni se
+ * muestra, y el backend deberá almacenar solo un hash.
+ */
+export type AdminProfessional = Professional & {
+  categories?: string[]
+  email?: string
+  phone?: string
+  bio?: string
+  password?: string
+  schedule: string
+  active: boolean
+  appointments: number
+}
+
+export const demoProfessionals: AdminProfessional[] = professionals.map((person, index) => ({
   ...person,
   schedule: index === 1 ? 'Lun–Sáb · 10:00–18:00' : 'Lun–Sáb · 09:00–17:00',
   active: true,

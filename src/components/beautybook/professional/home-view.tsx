@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { ArrowRight, CalendarDays, CheckCheck, Clock3, Eye, Heart } from 'lucide-react'
 import { demoCustomers, type DemoAppointment } from '@/lib/dashboard-demo-data'
 import { Avatar } from '@/components/beautybook/dashboard-ui'
+import { appointmentsInWeek } from '@/components/beautybook/professional/professional-shared'
 
 /* Muestra: insignia VIP y rango de fechas de la vista de inicio (sin backend). */
 function isVipCustomer(name: string) {
@@ -111,20 +112,20 @@ export function ProfessionalHome({
                 <span className="bb-stat-icon is-sage">
                   <CheckCheck aria-hidden="true" />
                 </span>
-                <span className="bb-stat-pill is-mint">↗ +20%</span>
+                <span className="bb-stat-pill is-mint">Del 9 al 15 nov</span>
               </div>
               <span className="bb-stat-label">Esta semana</span>
-              <strong className="bb-stat-value">18</strong>
+              <strong className="bb-stat-value">{appointmentsInWeek(appointments).length}</strong>
             </article>
             <article className="bb-stat-card">
               <div className="bb-stat-top">
                 <span className="bb-stat-icon">
                   <Clock3 aria-hidden="true" />
                 </span>
-                <span className="bb-stat-pill">De 32 h disp.</span>
+                <span className="bb-stat-pill">Semana siguiente</span>
               </div>
-              <span className="bb-stat-label">Horas en agenda</span>
-              <strong className="bb-stat-value">26 h</strong>
+              <span className="bb-stat-label">Próximas citas</span>
+              <strong className="bb-stat-value">{upcoming.length}</strong>
             </article>
           </div>
 
@@ -227,7 +228,7 @@ export function ProfessionalHome({
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B07D6B] opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-[#B07D6B]" />
                   </span>
-                  En 25 min · {next.time}
+                  {next.date.startsWith('Hoy') ? `Hoy · ${next.time}` : `${next.date} · ${next.time}`}
                 </span>
               </div>
               <div className="bb-next-client">

@@ -9,7 +9,7 @@ import { isPastTimeSlot, isSameDay, startOfToday, toDateKey } from '@/lib/date-u
 import { getDemoBusyTimes, getDemoDayTimes, getDemoWeeks } from '@/lib/demo-availability'
 import { getServiceIcon } from '@/lib/service-icons'
 import { capitalize, formatCOP } from '@/lib/utils'
-import { isValidEmail } from '@/lib/validation'
+import { isValidColombianPhone, isValidEmail } from '@/lib/validation'
 
 const steps = ['Servicio', 'Profesional', 'Fecha y hora', 'Tus datos', 'Confirmación']
 const weekday = new Intl.DateTimeFormat('es-ES', { weekday: 'short' })
@@ -45,7 +45,12 @@ const privacySections = [
 
 export default function BookingFlow({ initialService, initialProfessional }: { initialService?: string; initialProfessional?: string }) {
   const validInitial = services.some((service) => service.id === initialService) ? initialService! : ''
-  const validProfessional = professionals.some((person) => person.id === initialProfessional) ? initialProfessional! : 'none'
+  // Solo se acepta la profesional de la URL si existe y atiende el servicio de la URL (si lo hay).
+  const validProfessional =
+    professionals.some((person) => person.id === initialProfessional) &&
+    (!validInitial || (serviceProfessionals[validInitial] ?? []).includes(initialProfessional!))
+      ? initialProfessional!
+      : 'none'
   const [step, setStep] = useState(0)
   const [serviceId, setServiceId] = useState(validInitial)
   const [professionalId, setProfessionalId] = useState(validProfessional)
@@ -160,7 +165,8 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
     if (step === 0 && !serviceId) return setError('Elige un servicio para continuar.')
     if (step === 2 && (!selectedDateKey || !time)) return setError('Selecciona una fecha y una hora.')
     if (step === 3) {
-      if (!name.trim() || !isValidEmail(email) || !phone.trim()) return setError('Completa tu nombre, un email válido y tu teléfono.')
+      if (!name.trim() || !isValidEmail(email.trim())) return setError('Completa tu nombre y un email válido.')
+      if (!isValidColombianPhone(phone)) return setError('Escribe un teléfono colombiano válido, por ejemplo 300 123 4567.')
       if (!acceptedPrivacy) return setPrivacyError('Para continuar, acepta la política de privacidad.')
     }
     setStep((current) => Math.min(current + 1, 4))
@@ -285,7 +291,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
       {step === 2 && (
         <div className="booking-content booking-datetime">
           <h2>Elige cuándo venir.</h2>
-          <p className="booking-lead">Próximos días disponibles en nuestro estudio.</p>
+          <p className="booking-lead">Elige el día y la hora que mejor te vengan.</p>
           <div className="calendar-toolbar">
             <h3>{monthLabel}</h3>
             <div className="calendar-arrows">
@@ -467,9 +473,9 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
       {step === 4 && (
         <div className="booking-content confirmation booking-confirmation">
           <span className="success-icon" aria-hidden="true"><Check size={32} /></span>
-          <span className="eyebrow">TODO LISTO, {name.split(' ')[0].toUpperCase()}</span>
+          <span className="eyebrow">TODO LISTO, {name.trim().split(/\s+/)[0].toUpperCase()}</span>
           <h2 className="confirmation-heading">Tu momento ya<br /><em>está reservado.</em></h2>
-          <p className="confirmation-message">Enviamos los detalles de tu cita a <strong>{email}</strong>.</p>
+          <p className="confirmation-message">Enviamos los detalles de tu cita a <strong>{email.trim()}</strong>.</p>
           <div className="confirmation-columns">
             <aside className="confirmation-summary" aria-label="Resumen de tu cita">
               <div className="confirmation-summary-head">

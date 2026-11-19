@@ -3,9 +3,16 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { ArrowUpDown, Check, Clock3, Eye, MessageCircle, Pencil, Plus, Search, Sparkles, Trash2 } from 'lucide-react'
 import { demoCustomers, demoServices, type DemoAppointment } from '@/lib/dashboard-demo-data'
-import { DeleteDialog, DialogBackdrop, FilterDropdown, Modal, useEscapeKey } from '@/components/beautybook/dashboard-ui'
+import {
+  DeleteDialog,
+  DialogBackdrop,
+  FilterDropdown,
+  Modal,
+  Pager,
+  usePagination,
+} from '@/components/beautybook/dashboard-ui'
 import { formatCOP } from '@/lib/utils'
-import { isValidEmail } from '@/lib/validation'
+import { isValidColombianPhone, isValidEmail } from '@/lib/validation'
 import {
   initialsOf,
   type Customer,
@@ -48,6 +55,8 @@ export function CustomersView({
     else if (sort === 'Nombre A-Z') sorted.sort((a, b) => a.name.localeCompare(b.name, 'es'))
     return sorted
   }, [items, query, filter, sort])
+
+  const { page, pageCount, pageItems, rangeLabel, setPage } = usePagination(filtered, `${query}|${filter}|${sort}`)
 
   function saveCustomer(draft: CustomerDraft) {
     const name = draft.name.trim()
@@ -198,7 +207,7 @@ export function CustomersView({
               </tr>
             </thead>
             <tbody>
-              {filtered.map((customer) => {
+              {pageItems.map((customer) => {
                 const isToday = customer.lastVisit.startsWith('Hoy')
                 return (
                   <tr key={`${customer.phone}|${customer.name}`}>
@@ -284,21 +293,10 @@ export function CustomersView({
           )}
         </div>
         <div className="bb-table-footer bb-agenda-footer">
-          <span>Mostrando {filtered.length} de 1.284 perfiles</span>
-          <div className="bb-pager">
-            <button type="button" className="bb-page-btn">
-              Anterior
-            </button>
-            <button type="button" className="bb-page-btn is-current" aria-current="page">
-              1
-            </button>
-            <button type="button" className="bb-page-btn">
-              2
-            </button>
-            <button type="button" className="bb-page-btn">
-              Siguiente
-            </button>
-          </div>
+          <span>
+            Mostrando {rangeLabel} de {filtered.length} {filtered.length === 1 ? 'cliente' : 'clientes'}
+          </span>
+          <Pager page={page} pageCount={pageCount} onChange={setPage} />
         </div>
       </section>
       {creating && (
@@ -364,6 +362,10 @@ function CustomerFormModal({
     event.preventDefault()
     if (!name.trim() || !phone.trim()) {
       setError('Completa el nombre y el teléfono del cliente.')
+      return
+    }
+    if (!isValidColombianPhone(phone)) {
+      setError('Escribe un teléfono colombiano válido, por ejemplo 300 123 4567.')
       return
     }
     if (email.trim() && !isValidEmail(email.trim())) {
@@ -538,7 +540,6 @@ export function CustomerModal({
   appointments: DemoAppointment[]
   notify: (message: string) => void
 }) {
-  useEscapeKey(onClose)
   const customerAppointments = appointments.filter((appointment) => appointment.customer === customer.name)
   const totalSpent = customerAppointments.reduce((sum, appointment) => sum + (appointment.price || 0), 0)
   const professionalCounts = customerAppointments.reduce<Record<string, number>>((acc, appointment) => {

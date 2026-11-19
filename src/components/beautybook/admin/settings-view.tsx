@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { Banknote, Check, Clock3, Globe, MapPin, Phone, Sparkles, Upload } from 'lucide-react'
 import { FilterDropdown } from '@/components/beautybook/dashboard-ui'
 import { TimePicker } from '@/components/beautybook/admin/time-picker'
+import { readImageFile } from '@/lib/image-upload'
+import { isValidColombianPhone, isValidEmail } from '@/lib/validation'
 import type { DaySchedule, Holiday } from '@/components/beautybook/admin/admin-shared'
 
 const SALON_DEFAULTS = {
@@ -85,17 +87,25 @@ export function SettingsView({ notify }: { notify: (message: string) => void }) 
   function pickLogo(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) {
-      notify('El archivo debe ser una imagen.')
-      return
-    }
-    const reader = new FileReader()
-    reader.onload = () => setLogo(String(reader.result ?? ''))
-    reader.readAsDataURL(file)
+    readImageFile(file, {
+      onError: notify,
+      onLoad: (dataUrl) => {
+        setLogo(dataUrl)
+      },
+    })
   }
 
   function submitInfo(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    // Ambos campos siguen siendo opcionales: solo se validan cuando tienen contenido.
+    if (contactEmail.trim() && !isValidEmail(contactEmail.trim())) {
+      notify('Escribe un correo de contacto válido.')
+      return
+    }
+    if (phone.trim() && !isValidColombianPhone(phone)) {
+      notify('Escribe un teléfono colombiano válido, por ejemplo +57 314 892 4510.')
+      return
+    }
     setInfoSaved(true)
     notify('Configuración guardada en esta vista de muestra.')
     window.setTimeout(() => setInfoSaved(false), 2400)

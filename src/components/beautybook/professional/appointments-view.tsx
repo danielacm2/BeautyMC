@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { CalendarDays, Eye, List, Search } from 'lucide-react'
 import type { DemoAppointment } from '@/lib/dashboard-demo-data'
 import { Avatar, FilterDropdown } from '@/components/beautybook/dashboard-ui'
+import { appointmentsInWeek } from '@/components/beautybook/professional/professional-shared'
 import { formatCOP } from '@/lib/utils'
 
 export function MyAppointments({
@@ -72,7 +73,7 @@ export function MyAppointments({
             <div className="bb-citas-capsule-div" aria-hidden="true" />
             <div className="bb-citas-metric">
               <span>ESTA SEMANA</span>
-              <strong>18</strong>
+              <strong>{appointmentsInWeek(appointments).length}</strong>
             </div>
           </div>
         </div>

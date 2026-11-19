@@ -53,7 +53,7 @@ export default function LoginForm() {
     <form className="login-form" onSubmit={handleSubmit} noValidate aria-busy={submitting}>
       <div className="login-field">
         <label htmlFor="login-email">Correo electrónico</label>
-        <input ref={emailRef} id="login-email" name="email" type="email" inputMode="email" autoComplete="username" placeholder="nombre@ejemplo.com" value={email} onChange={(event) => { setEmail(event.target.value); if (errors.email) setErrors((current) => ({ ...current, email: undefined })) }} aria-invalid={errors.email ? true : undefined} aria-describedby={errors.email ? 'login-email-error' : undefined} disabled={submitting}/>
+        <input ref={emailRef} id="login-email" name="email" type="email" inputMode="email" autoComplete="username" placeholder="nombre@example.com" value={email} onChange={(event) => { setEmail(event.target.value); if (errors.email) setErrors((current) => ({ ...current, email: undefined })) }} aria-invalid={errors.email ? true : undefined} aria-describedby={errors.email ? 'login-email-error' : undefined} disabled={submitting}/>
         {errors.email && <p className="login-error" id="login-email-error" role="alert">{errors.email}</p>}
       </div>
       <div className="login-field">

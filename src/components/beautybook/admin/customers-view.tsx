@@ -401,7 +401,7 @@ function CustomerFormModal({
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  placeholder="cliente@email.com"
+                  placeholder="cliente@example.com"
                   autoComplete="off"
                 />
               </div>
@@ -415,7 +415,7 @@ function CustomerFormModal({
                   type="tel"
                   value={phone}
                   onChange={(event) => setPhone(event.target.value)}
-                  placeholder="+57 310 000 0000"
+                  placeholder="+57 300 000 0000"
                   autoComplete="off"
                 />
               </div>

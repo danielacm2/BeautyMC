@@ -234,7 +234,7 @@ export function CreateAppointmentModal({
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="hola@ejemplo.com"
+                placeholder="hola@example.com"
                 autoComplete="off"
               />
             </label>

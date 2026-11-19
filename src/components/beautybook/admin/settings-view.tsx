@@ -11,8 +11,8 @@ import type { DaySchedule, Holiday } from '@/components/beautybook/admin/admin-s
 
 const SALON_DEFAULTS = {
   name: 'BeautyMC',
-  email: 'hola@beautymc.studio',
-  phone: '+57 314 892 4510',
+  email: 'hola@beautymc.example',
+  phone: '+57 300 000 0000',
   address: 'Calle Sur, 42, El Poblado, Medellín, Colombia',
   currency: 'COP ($) · Peso colombiano',
   timezone: 'Bogotá (GMT-5)',
@@ -103,7 +103,7 @@ export function SettingsView({ notify }: { notify: (message: string) => void }) 
       return
     }
     if (phone.trim() && !isValidColombianPhone(phone)) {
-      notify('Escribe un teléfono colombiano válido, por ejemplo +57 314 892 4510.')
+      notify('Escribe un teléfono colombiano válido, por ejemplo +57 300 000 0000.')
       return
     }
     setInfoSaved(true)
@@ -283,7 +283,7 @@ export function SettingsView({ notify }: { notify: (message: string) => void }) 
                     type="email"
                     value={contactEmail}
                     onChange={(event) => setContactEmail(event.target.value)}
-                    placeholder="hola@beautymc.studio"
+                    placeholder="hola@beautymc.example"
                     autoComplete="off"
                   />
                 </label>
@@ -293,7 +293,7 @@ export function SettingsView({ notify }: { notify: (message: string) => void }) 
                     type="tel"
                     value={phone}
                     onChange={(event) => setPhone(event.target.value)}
-                    placeholder="+57 314 892 4510"
+                    placeholder="+57 300 000 0000"
                     autoComplete="off"
                   />
                 </label>

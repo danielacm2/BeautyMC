@@ -317,7 +317,7 @@ export default function ManageBooking() {
                 type="email"
                 value={email}
                 onChange={(event) => { setEmail(event.target.value); setSearchError('') }}
-                placeholder="hola@ejemplo.com"
+                placeholder="hola@example.com"
                 autoComplete="email"
               />
             </div>

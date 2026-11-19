@@ -35,11 +35,11 @@ const privacySections = [
   },
   {
     title: 'Tus derechos',
-    body: 'Puedes solicitar el acceso, la rectificación o la supresión de tus datos, oponerte a su tratamiento y solicitar su limitación o portabilidad. Para ejercer tus derechos, escríbenos a beautymc@gmail.com indicando el derecho que deseas ejercer. También puedes reclamar ante la autoridad de protección de datos de tu país.',
+    body: 'Puedes solicitar el acceso, la rectificación o la supresión de tus datos, oponerte a su tratamiento y solicitar su limitación o portabilidad. Para ejercer tus derechos, escríbenos a contacto@beautymc.example indicando el derecho que deseas ejercer. También puedes reclamar ante la autoridad de protección de datos de tu país.',
   },
   {
     title: 'Cómo contactarnos',
-    body: 'Si tienes cualquier duda sobre esta política o sobre el tratamiento de tus datos, puedes escribirnos a beautymc@gmail.com o dirigirte a BeautyMC, Calle Sur, 42 123, Medellín-Colombia.',
+    body: 'Si tienes cualquier duda sobre esta política o sobre el tratamiento de tus datos, puedes escribirnos a contacto@beautymc.example o dirigirte a BeautyMC, Calle Sur, 42 123, Medellín-Colombia.',
   },
 ]
 
@@ -383,7 +383,7 @@ export default function BookingFlow({ initialService, initialProfessional }: { i
                 </div>
                 <div className="checkout-field">
                   <label className="checkout-label" htmlFor="booking-email">Correo electrónico <span className="required-mark" aria-hidden="true">*</span></label>
-                  <input id="booking-email" type="email" autoComplete="email" aria-describedby="booking-email-help" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="hola@ejemplo.com" required />
+                  <input id="booking-email" type="email" autoComplete="email" aria-describedby="booking-email-help" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="hola@example.com" required />
                   <small id="booking-email-help" className="checkout-help">Aquí llegará la confirmación de tu cita.</small>
                 </div>
                 <div className="checkout-field">

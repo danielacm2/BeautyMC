@@ -101,11 +101,11 @@ export function MyProfile({ notify }: { notify: (message: string) => void }) {
             <div className="bb-form-row">
               <label>
                 Correo electrónico
-                <input type="email" defaultValue="laura.martin@email.com" />
+                <input type="email" defaultValue="laura.martin@example.com" />
               </label>
               <label>
                 Teléfono / WhatsApp
-                <input type="tel" defaultValue="+34 612 345 870" />
+                <input type="tel" defaultValue="+57 300 000 0000" />
               </label>
             </div>
 

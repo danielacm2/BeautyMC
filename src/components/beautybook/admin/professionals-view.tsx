@@ -335,7 +335,7 @@ function EditProfessionalModal({
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="camila@beautymc.co"
+                    placeholder="camila@beautymc.example"
                     autoComplete="off"
                   />
                 </div>
@@ -696,7 +696,7 @@ function AddProfessionalModal({ onClose, onSave }: { onClose: () => void; onSave
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="camila@beautymc.co"
+                    placeholder="camila@beautymc.example"
                     autoComplete="off"
                   />
                 </div>

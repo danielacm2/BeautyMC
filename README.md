@@ -88,8 +88,12 @@ El frontend valida por comodidad de la usuaria; **el backend debe volver a valid
 
 ## Datos de demostración pendientes
 
-- Los datos de contacto del salón son de demostración y **no coinciden entre sí**: el pie de página usa `beautymc@gmail.com`, Configuración usa `hola@beautymc.studio` y `+57 314 892 4510`, y hay una dirección con «Calle Sur, 42 123». Hay que confirmar los reales con el negocio.
+- Todos los datos de contacto son ficticios: correos con dominios reservados (`@beautymc.example`, `@example.com`, `demo@beautymc.test`) y el teléfono `+57 300 000 0000` en todos los registros. El pie de página muestra `contacto@beautymc.example` como texto, sin enlace. Hay una dirección con «Calle Sur, 42 123» por confirmar con el negocio.
 - Los clientes y citas de demostración están fechados respecto al «hoy» ficticio del 14 de noviembre de 2026 (`DEMO_TODAY_LABEL`).
-- Algunos datos de demostración usan teléfonos con prefijos internacionales a propósito (p. ej. `+34`); no pasan por `isValidColombianPhone` hasta que se editen.
+- El teléfono de demostración `+57 300 000 0000` cumple `isValidColombianPhone`; los ejemplos de los formularios (`300 123 4567`) también son ficticios.
 - Las cifras del inicio de administración (citas de hoy, ingresos, «1.284» clientes, porcentajes de variación) y los porcentajes del panel profesional son ilustrativos y no se calculan a partir de los datos de muestra; no hay forma de confirmar valores reales sin backend. Habrá que calcularlos a partir de la base de datos.
 - No hay interfaz para cambiar el estado de una cita (`Pendiente` → `Confirmada` → `Completada` / `Cancelada`): el proyecto no define sus reglas de transición y no se han inventado.
+
+## Créditos de imágenes
+
+Los recursos fotográficos incluidos en esta demostración fueron generados mediante herramientas de inteligencia artificial y se utilizan con fines ilustrativos.
